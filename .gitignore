@@ -1,0 +1,10 @@
+*.mp4
+*.gif
+*.asv
+*.png
+*.xlsx
+*.db
+*.db-shm
+*.db-wal
+*.log
+*.ini

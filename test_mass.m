@@ -1,0 +1,26 @@
+
+% canvas
+f = createWindow([0 2*12.8],[0 2*7.2],1080/2);
+
+% initialize masses
+nMasses = 60;
+for iim = 1:nMasses
+    m(iim) = gfx2d.mass(...
+        0,0,...
+        2-iim/nMasses,...
+        1-iim/nMasses/2,...
+        [0,0],...
+        'LineWidth', 3-2.99*iim/nMasses);
+end
+drawnow
+
+% plotting loop
+for ii = 1:200
+   for iim = 1:nMasses
+       m(iim).setPosition(...
+           3+0.3*iim,...
+           7+4*cos(iim/10-ii/10),...
+           [-cos((ii+iim)/30) sin((ii+iim)/10)]);
+   end
+   pause(0.01);
+end
