@@ -60,13 +60,13 @@ dtt = tt(2)-tt(1);
 % Fenster:
 frame = createWindow([xmin,xmax],[ymin,ymax],yres,'figure',1,'backcolor',fo,'grid','on','gridx',1,'gridy',1);
 % Waende:
-walls{1} = gfx2d.wall([1,1],[7,9],npl,true,'Color',co,'LineWidth',lw);
-walls{2} = gfx2d.wall([2.5,4.5],[7-bw,7-bw],npl,false,'Color',co,'LineWidth',lw);
-walls{3} = gfx2d.wall([2.5,4.5],[9+bw,9+bw],npl,true,'Color',co,'LineWidth',lw);
-walls{4} = gfx2d.wall([6+ru-0.5,6+ro+0.5],[2,2],npl,false,'Color',co,'LineWidth',lw);
-walls{5} = gfx2d.wall([0.5,1.5],[2,2],npl,false,'Color',co,'LineWidth',lw);
-walls{6} = gfx2d.wall([0.5,1.5],[6,6],npl,true,'Color',co,'LineWidth',lw);
-walls{7} = gfx2d.wall([6,8],[9+bw,9+bw],npl,true,'Color',co,'LineWidth',lw);
+walls{1} = gfx2d.wall([1,1],[7,9],npl,+1,'Color',co,'LineWidth',lw);
+walls{2} = gfx2d.wall([2.5,4.5],[7-bw,7-bw],npl,-1,'Color',co,'LineWidth',lw);
+walls{3} = gfx2d.wall([2.5,4.5],[9+bw,9+bw],npl,+1,'Color',co,'LineWidth',lw);
+walls{4} = gfx2d.wall([6+ru-0.5,6+ro+0.5],[2,2],npl,-1,'Color',co,'LineWidth',lw);
+walls{5} = gfx2d.wall([0.5,1.5],[2,2],npl,-1,'Color',co,'LineWidth',lw);
+walls{6} = gfx2d.wall([0.5,1.5],[6,6],npl,+1,'Color',co,'LineWidth',lw);
+walls{7} = gfx2d.wall([6,8],[9+bw,9+bw],npl,+1,'Color',co,'LineWidth',lw);
 % Massen:
 masses{1} = gfx2d.mass(3.5,8,1,2,[0;1],'Color',co,'LineWidth',lw);
 masses{2} = gfx2d.lumpedmass(6+l*sin(-0),(8-l)+l*cos(-0),dm,'Color',co);
