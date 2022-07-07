@@ -248,24 +248,24 @@ classdef torque < handle
         
         
         function setPosition(obj,X,Y,varargin)
-%             if nargin>=4
-%                 obj.value = varargin{1};
-%                 if nargin==5
-%                     obj.maxvalue = varargin{2};
-%                 end
-%             end
-%             %% Calc:
-%             dalpha = obj.dAlphaMax*sgn(obj.value)*abs(obj.value/obj.maxvalue);
-%             l = abs(2*dalpha*obj.r);
-%             % Referenzpfeil:
-%             xsr = sign(dalpha)*[linspace(0,l,obj.Nu),linspace(l,max([0,l-obj.b/(2*tan(obj.fsw))]),obj.Nu),NaN,linspace(max([0,l-obj.b/(2*tan(obj.fsw))]),l,obj.Nu)];
-%             ysr = [linspace(0,0,obj.Nu),linspace(0,+obj.b/2,obj.Nu),NaN,linspace(-obj.b/2,0,obj.Nu)];
-%             % Transformation:
-%             xs = X+(obj.r+ysr).*cos(obj.alpha0+xsr./(2*obj.r));
-%             ys = Y+(obj.r+ysr).*sin(obj.alpha0+xsr./(2*obj.r));
-%             %% Update:
-%             obj.handl.XData = xs;
-%             obj.handl.YData = ys;
+            if nargin>=4
+                obj.value = varargin{1};
+                if nargin==5
+                    obj.maxvalue = varargin{2};
+                end
+            end
+            %% Calc:
+            dalpha = obj.dAlphaMax*sgn(obj.value)*abs(obj.value/obj.maxvalue);
+            l = abs(2*dalpha*obj.r);
+            % Referenzpfeil:
+            xsr = sign(dalpha)*[linspace(0,l,obj.Nu),linspace(l,max([0,l-obj.b/(2*tan(obj.fsw))]),obj.Nu),NaN,linspace(max([0,l-obj.b/(2*tan(obj.fsw))]),l,obj.Nu)];
+            ysr = [linspace(0,0,obj.Nu),linspace(0,+obj.b/2,obj.Nu),NaN,linspace(-obj.b/2,0,obj.Nu)];
+            % Transformation:
+            xs = X+(obj.r+ysr).*cos(obj.alpha0+xsr./(2*obj.r));
+            ys = Y+(obj.r+ysr).*sin(obj.alpha0+xsr./(2*obj.r));
+            %% Update:
+            obj.handl.XData = xs;
+            obj.handl.YData = ys;
             obj.position = [X,Y];
             dalpha = obj.dAlphaMax*sgn(obj.value)*abs(obj.value/obj.maxvalue);
             l = abs(2*dalpha*obj.r);

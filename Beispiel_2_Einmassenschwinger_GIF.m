@@ -1,9 +1,9 @@
-%% Draw Mech Sys 2: Beispiel 4
+%% Draw Mech Sys 2: Beispiel 2
 %Mit Draw Mech Sys 2 lassen sich einfach Bilder und Animationen von mechanischen Systemen erstellen:
 
 %% VideoWriter erstellen:
 fps = 30;
-v = GIFWriter('Beispiel_4',fps);
+v = GIFWriter('Beispiel_2',fps);
 
 %% Fenster und Objekte erzeugen
 f = createWindow([-5 5],[-5 3],480);

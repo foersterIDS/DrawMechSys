@@ -23,14 +23,14 @@ classdef wall < gfx2d.LineObject
             lw = 3;
             obj.npl = npl;
             b = 1/obj.npl;
-            try
-                obj.orientation = sgn(orientation);
-            catch
+            if islogical(orientation)
                 if orientation
                     obj.orientation = +1;
                 else
                     obj.orientation = -1;
                 end
+            else
+                obj.orientation = sgn(orientation);
             end
             %% Input:
             if nargin>stdinp
