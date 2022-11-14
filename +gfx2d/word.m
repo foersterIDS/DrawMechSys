@@ -180,6 +180,11 @@ classdef word < handle
             obj.pl.Position = [obj.position(1),obj.position(2),0];
             obj.pl.Rotation = obj.angle*360/(2*pi);
         end
+
+        function setText(obj,str)
+            obj.str = str;
+            set(obj.pl,'String',['$',str,'$']);
+        end
         
         function delete(obj)
             delete(obj.pl);
