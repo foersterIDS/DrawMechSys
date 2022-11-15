@@ -108,6 +108,7 @@ classdef trail < handle
             % neue Koordinaten
             obj.x(1:min([length(X),obj.n])) = X(1:min([length(X),obj.n]));
             obj.y(1:min([length(Y),obj.n])) = Y(1:min([length(X),obj.n]));
+            obj.b = (obj.b(1)*sqrt(linspace(1,0,obj.n)))';
             updateVertices(obj);
         end
     end
@@ -124,6 +125,9 @@ classdef trail < handle
             dx = reshape([bv, -bv]',[],1).*repelem(gy,2);
             dy = reshape([-bv, bv]',[],1).*repelem(gx,2);            
             
+            ndx = numel(dx);
+
+            obj.handl.Faces = [(1:ndx-2)',(2:(ndx-1))',(3:(ndx-0))'];
             obj.handl.Vertices = [repelem(obj.x(:),2)+dx repelem(obj.y(:),2)+dy];
         end
     
