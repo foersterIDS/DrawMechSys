@@ -33,9 +33,11 @@ classdef GIFWriter < handle
             obj.filename = [obj.path,obj.name,'.gif'];
         end
         
-        function obj = writeGIF(obj,frame)
-            fr = getframe(frame);
-            im = fr.cdata;
+        function obj = writeGIF(obj,frame,im)
+            if nargin<3
+                fr = getframe(frame);
+                im = fr.cdata;
+            end
             %% Farbkorrektur:
             [d1,d2,d3] = size(im);
             if d3==1

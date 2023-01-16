@@ -119,9 +119,9 @@ classdef coordinatesystem < handle
             obj.offset1 = 0.9*obj.l;
             obj.offset2 = 3*obj.b;
             obj.offset3 = 1.5*obj.r;
-            obj.tx = gfx2d.word(obj.offset1,-sign(obj.z)*obj.offset2,obj.str{1},'color',obj.color,'fonsize',obj.fs,'window',obj,3);
-            obj.ty = gfx2d.word(-obj.offset2,sign(obj.z)*obj.offset1,obj.str{2},'color',obj.color,'fonsize',obj.fs,'window',obj,4);
-            obj.tz = gfx2d.word(-obj.offset3,-sign(obj.z)*obj.offset3,obj.str{3},'color',obj.color,'fonsize',obj.fs,'window',obj,5);
+            obj.tx = gfx2d.word(obj.offset1,-sign(obj.z)*obj.offset2,obj.str{1},'color',obj.color,'fontsize',obj.fs,'window',obj,3);
+            obj.ty = gfx2d.word(-obj.offset2,sign(obj.z)*obj.offset1,obj.str{2},'color',obj.color,'fontsize',obj.fs,'window',obj,4);
+            obj.tz = gfx2d.word(-obj.offset3,-sign(obj.z)*obj.offset3,obj.str{3},'color',obj.color,'fontsize',obj.fs,'window',obj,5);
             %% Transform:
             obj.setPosition(x,y,angle);
             %% Callback function:

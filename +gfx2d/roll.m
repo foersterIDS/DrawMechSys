@@ -14,6 +14,7 @@ classdef roll < gfx2d.RigidBody
     properties (Dependent)
         color
         facecolor
+        orientationColor
     end
     
     methods
@@ -26,6 +27,7 @@ classdef roll < gfx2d.RigidBody
             obj.d = d;
             obj.showOrientation = 0;
             orientation = 0;
+            orientationColor = color;
             %% Input:
             if nargin>stdinp
                 i = 1;
@@ -43,6 +45,9 @@ classdef roll < gfx2d.RigidBody
                         case 'orientation'
                             obj.showOrientation = 1;
                             obj.angle = varargin{i+1};
+                            i = i+1;
+                        case 'orientationcolor'
+                            orientationColor = varargin{i+1};
                             i = i+1;
                         case 'window'
                             obj.window = varargin{i+1};
@@ -69,7 +74,7 @@ classdef roll < gfx2d.RigidBody
             setPosition(obj,x,y,orientation)
             
             obj.pf = fill(xs,ys,'','FaceColor',facecolor,'EdgeColor',color,'LineWidth',lw,'Parent',obj.hgTransformHandle,'buttondownfcn',{@Mouse_Callback,'drag',obj});
-            obj.pl = plot(xso,yso,'Color',color,'LineWidth',lw,'Parent',obj.hgTransformHandle,'buttondownfcn',{@Mouse_Callback,'drag',obj});
+            obj.pl = plot(xso,yso,'Color',orientationColor,'LineWidth',lw,'Parent',obj.hgTransformHandle,'buttondownfcn',{@Mouse_Callback,'drag',obj});
             if obj.showOrientation
                 obj.pl.Visible = true;
             else
@@ -194,7 +199,6 @@ classdef roll < gfx2d.RigidBody
         
         function set.color(obj,newcolor)
             obj.pf.EdgeColor = newcolor;
-            obj.pl.Color = newcolor;
         end
         
         function col = get.color(obj)
@@ -207,6 +211,14 @@ classdef roll < gfx2d.RigidBody
         
         function col = get.facecolor(obj)
             col = obj.pf.FaceColor;
+        end
+
+        function set.orientationColor(obj,newColor)
+            obj.pl.Color = newColor;
+        end
+
+        function col = get.orientationColor(obj)
+            col = obj.pl.Color;
         end
         
         function globalLocation = local2global(obj,localLocation)
