@@ -1,56 +1,32 @@
-function f = createWindow(xLimits,yLimits,yResolution,varargin)
+function f = createWindow(xLimits,yLimits,yResolution,NameValueArgs)
     %CREATEWINDOW(xLimits,yLimits,yResolution)
     % creates blank window
-    %% Init:
+    %% Arguments:
+    arguments
+        xLimits (1,2) double
+        yLimits (1,2) double
+        yResolution (1,1) double {mustBeInteger,mustBeGreaterThan(yResolution,0)}
+        NameValueArgs.grid (1,:) char {mustBeMember(NameValueArgs.grid,{'on','off'})} = 'off'
+        NameValueArgs.gridcolor (1,3) double = 233/255*[1,1,1]
+        NameValueArgs.gridx (1,1) double = 1
+        NameValueArgs.gridy (1,1) double = 1
+        NameValueArgs.backcolor (1,3) double = [1,1,1]
+        NameValueArgs.figure (1,1) double {mustBeInteger,mustBeGreaterThan(NameValueArgs.figure,0)}
+        NameValueArgs.gridlinewidth (1,1) double {mustBePositive} = 2
+    end
+    %% Init.:
     xLimits = sort(xLimits);
     yLimits = sort(yLimits);
-    stdinp = 3;
-    isFig = 0;
-    gridon = 0;
-    gridcolor = 233/255*[1,1,1];
-    gridx = 1;
-    gridy = 1;
-    glw = 2;
-    backcolor = [1,1,1];
-    %% Input:
-    if nargin>stdinp
-        i = 1;
-        while i<=nargin-stdinp
-            switch lower(varargin{i})
-                case 'grid'
-                    if strcmp(varargin{i+1},'on')
-                        gridon = 1;
-                    elseif strcmp(varargin{i+1},'off')
-                        gridon = 0;
-                    else
-                        error('No such option for grid!');
-                    end
-                    i = i+1;
-                case 'gridcolor'
-                    gridcolor = varargin{i+1};
-                    i = i+1;
-                case 'gridx'
-                    gridx = varargin{i+1};
-                    i = i+1;
-                case 'gridy'
-                    gridy = varargin{i+1};
-                    i = i+1;
-                case 'backcolor'
-                    backcolor = varargin{i+1};
-                    i = i+1;
-                case 'figure'
-                    isFig = 1;
-                    nfig = varargin{i+1};
-                    i = i+1;
-                case 'gridlinewidth'
-                    glw = varargin{i+1};
-                    i = i+1;
-                otherwise
-                    error('No such element: %s',varargin{i});
-            end
-            i = i+1;
-        end
+    isFig = isfield(NameValueArgs,'figure');
+    if isFig
+        nfig = NameValueArgs.figure;
     end
+    gridon = strcmp(NameValueArgs.grid,'on');
+    gridcolor = NameValueArgs.gridcolor;
+    gridx = NameValueArgs.gridx;
+    gridy = NameValueArgs.gridy;
+    glw = NameValueArgs.gridlinewidth;
+    backcolor = NameValueArgs.backcolor;
     %% get screen resolution
     mScreenSize = get(groot,'ScreenSize'); % scaled pixels
     jScreenSize = java.awt.Toolkit.getDefaultToolkit.getScreenSize; % actual pixels
@@ -71,8 +47,8 @@ function f = createWindow(xLimits,yLimits,yResolution,varargin)
     else
         f = figure;
     end
-    f.Color = backcolor;
-    f.Position = fPosition;
+    set(f,'Color',backcolor);
+    set(f,'Position',fPosition);
     %% create axes
     ax = axes;
     ax.Position = [0,0,1,1];
