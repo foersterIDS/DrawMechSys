@@ -200,9 +200,11 @@ classdef damper < gfx2d.LineObject
         
         
         function setPosition(obj,X,Y)
-            %% Calc:
+            %% Calc. & initial update:
             l = sqrt((X(2)-X(1))^2+(Y(2)-Y(1))^2);
             alpha = atan((Y(2)-Y(1))/(X(2)-X(1)));
+            obj.p1 = [X(1);Y(1)];
+            obj.p2 = [X(2);Y(2)];
             %% Referenzdämpfer:
             obj.xsrl = [0,obj.lmin/3];
             obj.ysrl = [0,0];
@@ -224,15 +226,10 @@ classdef damper < gfx2d.LineObject
             xsr = X(1)+sgn(X(2)-X(1))*(obj.xsrr*cos(alpha)+obj.ysrr*sin(alpha));
             ysr = Y(1)+sgn(X(2)-X(1))*(obj.xsrr*sin(alpha)-obj.ysrr*cos(alpha));
             %% Update:
-            obj.handl{1}.XData = xsl;
-            obj.handl{1}.YData = ysl;
-            obj.handl{2}.XData = xsm;
-            obj.handl{2}.YData = ysm;
-            obj.handl{3}.XData = xsr;
-            obj.handl{3}.YData = ysr;
+            set(obj.handl{1},'XData',xsl,'YData',ysl);
+            set(obj.handl{2},'XData',xsm,'YData',ysm);
+            set(obj.handl{3},'XData',xsr,'YData',ysr);
             
-            obj.p1 = [X(1);Y(1)];
-            obj.p2 = [X(2);Y(2)];
             notify(obj,'changedPosition');
         end
         
