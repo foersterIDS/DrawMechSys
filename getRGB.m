@@ -1,254 +1,103 @@
-function [ rgb ] = getRGB( value, maxvalue, minvalue, skal )
-    %% init:
-    temp_func = @(v) v/maxvalue;
-    seperator = linspace(0,maxvalue,5);
-    mode = 'lin';
-    if nargin>2
-        if nargin>3
-            switch skal
-                case 'lin'
-                    mode = 'lin';
-                case 'log'
-                    minvalue = log(minvalue)/log(10);
-                    value = log(value)/log(10);
-                    maxvalue = log(maxvalue)/log(10);
-                    mode = 'log';
-                case 'cycle_open'
-                    mode = 'cycle_open';
-                case 'cycle_closed'
-                    mode = 'cycle_closed';
-                case 'cycle_open_twice'
-                    mode = 'cycle_open_twice';
-                case 'cycle_open_mix'
-                    mode = 'cycle_open_mix';
-                otherwise
-                    error('%s-mode not supported.',skal);
-            end
-        end
-        value=value-minvalue;
-        maxvalue=maxvalue-minvalue;
-        temp_func = @(v) v/maxvalue;
-        seperator = linspace(0,1,5);
+%% getRGB
+% 25.11.2020 - Alwin Förster
+% 16.05.2023 - Florian Jäger
+% ----------------------------------------------------------------------- %
+% Purpose:
+%           Get RGB values on a defined color value scale with specific
+%           colorcode of a colormap.
+% Input:
+%           value           =       Vector of values for interpolation
+%           maxValue        =       Max limit value
+%           minValue        =       min limit value
+%           cmName          =       Vector of values for interpolation
+% Output:
+%           rgb             =       Color codes
+% ----------------------------------------------------------------------- %
+function [ rgb ] = getRGB( value, maxValue, minValue, cmName )
+    arguments
+        value {valueInput}
+        maxValue (1,1) double = 1
+        minValue (1,1) double {mustBeLessThanOrEqual(minValue,maxValue)} = 0
+        cmName {cmNameInput} = 'viridis'
     end
-    r=0;
-    g=0;
-    b=0;
-    %% calc:
-    if strcmp(mode,'lin') || strcmp(mode,'log')
-        %% lin or log:
-        if maxvalue==0
-            r = 0;
-            g = 1;
-            b = 0;
-        else
-            temp=temp_func(value);
-            if temp<seperator(2)
-                r=0;
-                b=1;
-                g=((4*value-0*maxvalue)/maxvalue);
-            elseif temp<seperator(3)
-                r=0;
-                g=1;
-                b=1-((4*value-1*maxvalue)/maxvalue);
-            elseif temp<seperator(4)
-                b=0;
-                g=1;
-                r=((4*value-2*maxvalue)/maxvalue);
+    value = value(:);
+    if nargin==1 && isa(value,'char')
+        switch value
+            case 'r'
+                rgb = [183,39,58]/255;
+            case 'b'
+                rgb = [65,76,204]/255;
+            case 'g'
+                rgb = [65,163,52]/255;
+            case 'y'
+                rgb = [183,142,39]/255;
+            case 'e'
+                rgb = [181,0,24]/255;
+            case 'p'
+                rgb = [0,20,204]/255;
+            case 'k'
+                rgb = [0,0,0]/255;
+            case 'w'
+                rgb = [255,255,255]/255;
+            otherwise
+                error('unknown color');
+        end
+    else
+        if nargin<4
+            cmName = 'viridis';
+        elseif nargin<3
+            error('not enough input arguments');
+        elseif nargin>4
+            error('to many input arguments');
+        end
+        cm = colormap(cmName);
+        Pcm = linspace(0,1,numel(cm(:,1)))';
+        if maxValue<minValue
+            temp = minValue;
+            minValue = maxValue;
+            maxValue = temp;
+        end
+        if minValue==maxValue
+            if value>minValue
+                P = 1;
+            elseif value<minValue
+                P = 0;
             else
-                b=0;
-                r=1;
-                g=(-4/maxvalue)*value+4;
+                P = 0.5;
             end
-        end
-    elseif strcmp(mode,'cycle_open')
-        %% cycle_open:
-        seperator = linspace(0,1,6);
-        if maxvalue==0
-            r = 0;
-            g = 1;
-            b = 0;
         else
-            temp=temp_func(value);
-            if temp<seperator(2)
-                r=0;
-                g=1*((temp-seperator(1))/(seperator(2)-seperator(1)));
-                b=1;
-            elseif temp<seperator(3)
-                r=0;
-                g=1;
-                b=1-1*((temp-seperator(2))/(seperator(3)-seperator(2)));
-            elseif temp<seperator(4)
-                r=1*((temp-seperator(3))/(seperator(4)-seperator(3)));
-                g=1;
-                b=0;
-            elseif temp<seperator(5)
-                r=1;
-                g=1-1*((temp-seperator(4))/(seperator(5)-seperator(4)));
-                b=0;
-            else
-                r=1;
-                g=0;
-                b=1*((temp-seperator(5))/(seperator(6)-seperator(5)));
+            P = (value-minValue)/(maxValue-minValue);
+            P = max([zeros(size(P)),min([ones(size(P)),P],[],2)],[],2);
+        end
+        rgb = interp1(Pcm,cm,P);
+    end
+end
+
+function valueInput(v)
+    allowedColors = {'r','b','g','y','e','p','k','w'};
+    if ~isa(v,'double') && ~sum(strcmp(v,allowedColors))
+        errStr = "Input must be double or be a char of:";
+        for ii=1:numel(allowedColors)
+            errStr = strcat(errStr," '",allowedColors(ii),"'");
+            if ii~=numel(allowedColors)
+                errStr = strcat(errStr,",");
             end
         end
-    elseif strcmp(mode,'cycle_closed')
-        %% cycle_closed:
-        seperator = linspace(0,1,7);
-        if maxvalue==0
-            r = 0;
-            g = 1;
-            b = 0;
-        else
-            temp=temp_func(value);
-            if temp<seperator(2)
-                r=0;
-                g=1*((temp-seperator(1))/(seperator(2)-seperator(1)));
-                b=1;
-            elseif temp<seperator(3)
-                r=0;
-                g=1;
-                b=1-1*((temp-seperator(2))/(seperator(3)-seperator(2)));
-            elseif temp<seperator(4)
-                r=1*((temp-seperator(3))/(seperator(4)-seperator(3)));
-                g=1;
-                b=0;
-            elseif temp<seperator(5)
-                r=1;
-                g=1-1*((temp-seperator(4))/(seperator(5)-seperator(4)));
-                b=0;
-            elseif temp<seperator(6)
-                r=1;
-                g=0;
-                b=1*((temp-seperator(5))/(seperator(6)-seperator(5)));
-            else
-                r=1-1*((temp-seperator(6))/(seperator(7)-seperator(6)));
-                g=0;
-                b=1;
-            end
+        error(errStr);
+    end
+end
+
+function cmNameInput(c)
+    errStr = [];
+    if isa(c,'double')
+        sz = size(c);
+        if numel(sz)~=2 || sz(1)<2 || sz(2)~=3
+            errStr = 'Input must be a colormap name or a (n x 3) double with n >= 2.';
         end
-    elseif strcmp(mode,'cycle_open_twice')
-        %% cycle_open_twice:
-        seperator = linspace(0,1,12);
-        if maxvalue==0
-            r = 0;
-            g = 1;
-            b = 0;
-        else
-            temp=temp_func(value);
-            if temp<seperator(2)
-                r=0;
-                g=1*((temp-seperator(1))/(seperator(2)-seperator(1)));
-                b=1;
-            elseif temp<seperator(3)
-                r=0;
-                g=1;
-                b=1-1*((temp-seperator(2))/(seperator(3)-seperator(2)));
-            elseif temp<seperator(4)
-                r=1*((temp-seperator(3))/(seperator(4)-seperator(3)));
-                g=1;
-                b=0;
-            elseif temp<seperator(5)
-                r=1;
-                g=1-1*((temp-seperator(4))/(seperator(5)-seperator(4)));
-                b=0;
-            elseif temp<seperator(6)
-                r=1;
-                g=0;
-                b=1*((temp-seperator(5))/(seperator(6)-seperator(5)));
-            elseif temp<seperator(7)
-                r=1-1*((temp-seperator(6))/(seperator(7)-seperator(6)));
-                g=0;
-                b=1-0.5*((temp-seperator(6))/(seperator(7)-seperator(6)));
-            elseif temp<seperator(8)
-                r=0;
-                g=0.5*((temp-seperator(7))/(seperator(8)-seperator(7)));
-                b=0.5;
-            elseif temp<seperator(9)
-                r=0;
-                g=0.5;
-                b=0.5-0.5*((temp-seperator(8))/(seperator(9)-seperator(8)));
-            elseif temp<seperator(10)
-                r=0.5*((temp-seperator(9))/(seperator(10)-seperator(9)));
-                g=0.5;
-                b=0;
-            elseif temp<seperator(11)
-                r=0.5;
-                g=0.5-0.5*((temp-seperator(10))/(seperator(11)-seperator(10)));
-                b=0;
-            else
-                r=0.5;
-                g=0;
-                b=0.5*((temp-seperator(11))/(seperator(12)-seperator(11)));
-            end
-        end
-    elseif strcmp(mode,'cycle_open_mix')
-        %% cycle_open_mix:
-        seperator = linspace(0,1,9);
-        if maxvalue==0
-            r = 0;
-            g = 1;
-            b = 0;
-        else
-            temp=temp_func(value);
-            if temp<seperator(2)
-                r=0;
-                g=0;
-                b=0.5+0.5*((temp-seperator(1))/(seperator(2)-seperator(1)));
-            elseif temp<seperator(3)
-                r=0;
-                g=1*((temp-seperator(2))/(seperator(3)-seperator(2)));
-                b=1;
-            elseif temp<seperator(4)
-                r=0;
-                g=1;
-                b=1-1*((temp-seperator(3))/(seperator(4)-seperator(3)));
-            elseif temp<seperator(5)
-                r=0;
-                g=1-0.5*((temp-seperator(4))/(seperator(5)-seperator(4)));
-                b=0;
-            elseif temp<seperator(6)
-                r=1*((temp-seperator(5))/(seperator(6)-seperator(5)));
-                g=0.5+0.5*((temp-seperator(5))/(seperator(6)-seperator(5)));
-                b=0;
-            elseif temp<seperator(7)
-                r=1;
-                g=1-1*((temp-seperator(6))/(seperator(7)-seperator(6)));
-                b=0;
-            elseif temp<seperator(8)
-                r=1-0.5*((temp-seperator(7))/(seperator(8)-seperator(7)));
-                g=0;
-                b=0;
-            else
-                r=0.5+0.5*((temp-seperator(8))/(seperator(9)-seperator(8)));
-                g=0;
-                b=1*((temp-seperator(8))/(seperator(9)-seperator(8)));
-            end
-        end
+    elseif ~isa(c,'char') && ~isa(c,'string')
+        errStr = 'Input (cmName) must be a colormap name or a (n x 3) double with n >= 2.';
     end
-    %% check result:
-    if r>1
-        r=1;
+    if ~isempty(errStr)
+        error(errStr);
     end
-    if b>1
-        b=1;
-    end
-    if g>1
-        g=1;
-    end
-    if r<0
-        r=0;
-    end
-    if b<0
-        b=0;
-    end
-    if g<0
-        g=0;
-    end
-    if isnan(r) || isnan(g) || isnan(b)
-        r = 1;
-        g = 1;
-        b = 1;
-    end
-    %% export result:
-    rgb=[r,g,b];
 end
