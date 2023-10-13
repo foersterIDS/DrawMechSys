@@ -28,6 +28,7 @@ function f = createWindow(xLimits,yLimits,yResolution,NameValueArgs)
     glw = NameValueArgs.gridlinewidth;
     backcolor = NameValueArgs.backcolor;
     %% get screen resolution
+    set(groot,'Units','pixels');
     mScreenSize = get(groot,'ScreenSize'); % scaled pixels
     jScreenSize = java.awt.Toolkit.getDefaultToolkit.getScreenSize; % actual pixels
     scaleFactor = mScreenSize(3) / jScreenSize.getWidth ;
