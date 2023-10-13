@@ -5,6 +5,7 @@ classdef coordinatesystem < handle
         id
         position
         angle = 0;
+        rotateAxes = 1;
         z = +1;
         showZ = true;
         ax
@@ -57,6 +58,9 @@ classdef coordinatesystem < handle
                             i = i+1;
                         case 'axes'
                             obj.str = varargin{i+1};
+                            i = i+1;
+                        case 'rotateaxes'
+                            obj.rotateAxes = logical(varargin{i+1});
                             i = i+1;
                         case 'showz'
                             obj.showZ = varargin{i+1};
@@ -257,13 +261,13 @@ classdef coordinatesystem < handle
             posy = [X;Y]+[cos(angle),-sin(angle);sin(angle),cos(angle)]*[-obj.offset2;sign(obj.z)*obj.offset1];
             posz = [X;Y]+[cos(angle),-sin(angle);sin(angle),cos(angle)]*[-obj.offset3;-sign(obj.z)*obj.offset3];
             if sum(obj.objectIDs==3)
-                obj.tx.setPosition(posx(1),posx(2),angle);
+                obj.tx.setPosition(posx(1),posx(2),angle*obj.rotateAxes);
             end
             if sum(obj.objectIDs==4)
-                obj.ty.setPosition(posy(1),posy(2),angle);
+                obj.ty.setPosition(posy(1),posy(2),angle*obj.rotateAxes);
             end
             if sum(obj.objectIDs==5)
-                obj.tz.setPosition(posz(1),posz(2),angle);
+                obj.tz.setPosition(posz(1),posz(2),angle*obj.rotateAxes);
             end
         end
         
