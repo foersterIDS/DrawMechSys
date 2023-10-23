@@ -29,6 +29,51 @@ classdef RigidBody < handle
                 0 0 0 1];
             notify(obj,'changedPosition');
         end
+
+        function rotatedArroundPoint(obj,pointOfRotation,angleOfRotation,NameValueArgs)
+            arguments
+                obj (1,1)
+                pointOfRotation (2,1) double
+                angleOfRotation (1,1) double
+                NameValueArgs.type (1,:) char {mustBeMember(NameValueArgs.type,{'abs','rel'})} = 'rel'
+            end
+
+            ca = cos(angleOfRotation);
+            sa = sin(angleOfRotation);
+
+            R = [ca, -sa, 0;
+                 sa,  ca, 0;
+                 0,    0, 1];
+
+            t = [obj.position - pointOfRotation; 1];
+            
+            if strcmp(NameValueArgs.type,'rel')
+                obj.hgTransformHandle.Matrix = obj.hgTransformHandle.Matrix*...
+                [R, R*t - t;
+                 zeros(1,3), 1];
+            else
+                tInitial = obj.hgTransformHandle.Matrix(1:3,4);
+                obj.hgTransformHandle.Matrix = [R, R*t - t + tInitial;zeros(1,3), 1];
+            end
+
+            notify(obj,'changedPosition');
+        end
+
+        function translateObject(obj,vector,NameValueArgs)
+            arguments
+                obj (1,1)
+                vector (2,1) double
+                NameValueArgs.type (1,:) char {mustBeMember(NameValueArgs.type,{'abs','rel'})} = 'rel'
+            end
+
+            if strcmp(NameValueArgs.type,'rel')
+                t = [vector + obj.position; 0];
+            else
+                t = [vector ; 0]; 
+            end
+            
+            obj.setPosition(t(1),t(2),0);
+        end 
         
         function set.angle(obj,orientation)
             if numel(orientation) == 1
