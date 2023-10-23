@@ -13,7 +13,12 @@ classdef force < handle
         vector
         color
     end
-    
+    properties (Access=private)
+        arrowFilled
+        arrowRounded
+        arrowRoundness = 0.2;
+    end
+
     methods
         function obj = force(X,Y,b,vector,varargin)
             %% Init:
@@ -25,6 +30,8 @@ classdef force < handle
             obj.b = b;
             obj.p1 = [X;Y];
             obj.p2 = obj.p1+vector;
+            obj.arrowRounded = false;
+            obj.arrowFilled = false;
             %% Input:
             if nargin>stdinp
                 i = 1;
@@ -43,6 +50,20 @@ classdef force < handle
                             obj.window = varargin{i+1};
                             obj.id = varargin{i+2};
                             i = i+2;
+                        case 'filled'
+                            if strcmpi(varargin{i+1},'on')
+                                obj.arrowFilled = true;
+                            elseif strcmpi(varargin{i+1},'off')
+                                obj.arrowFilled = false;
+                            end
+                            i = i+1;
+                        case 'rounded'
+                            if strcmpi(varargin{i+1},'on')
+                                obj.arrowRounded = true;
+                            elseif strcmpi(varargin{i+1},'off')
+                                obj.arrowRounded = false;
+                            end
+                            i = i+1;
                         otherwise
                             error('No such element: %s',varargin{i});
                     end
@@ -55,8 +76,37 @@ classdef force < handle
             % Referenzpfeil:
             xsr1 = [0,0.9*l];
             ysr1 = [0,0];
-            xsr2 = [0.9*l,l,max([0,l-obj.b/(2*tan(obj.fsw))]),NaN,max([0,l-obj.b/(2*tan(obj.fsw))]),l];
-            ysr2 = [0,0,+obj.b/2,NaN,-obj.b/2,0];
+            arrHeadLenMax = obj.b/(2*tan(obj.fsw));
+            arrHeadLenReal = min([arrHeadLenMax,l]);
+            if arrHeadLenReal < arrHeadLenMax
+                bReal = 2 * arrHeadLenReal * tan(obj.fsw);
+            else
+                bReal = obj.b;
+            end
+            if obj.arrowFilled
+                if obj.arrowRounded
+                    N = max(bReal*30,30);
+                    yr = linspace(bReal/2,-bReal/2,N);
+                    ysr2 = [0, yr, 0];
+                else
+                    ysr2 = [0,+bReal/2,-bReal/2,0];
+                end
+            else
+                ysr2 = [0,0,+bReal/2,NaN,-bReal/2,0];
+            end
+            if obj.arrowFilled
+                if obj.arrowRounded
+                    xMiddle = l-(1-obj.arrowRoundness)*arrHeadLenReal;
+                    xEnd = l-arrHeadLenReal;
+                    
+                    xr = (xEnd - xMiddle)/(bReal/2)^2*yr.^2 + xMiddle;
+                    xsr2 = [l, xr, l];
+                else
+                    xsr2 = [l,l-arrHeadLenReal,l-arrHeadLenReal,l];
+                end
+            else
+                xsr2 = [0.9*l,l,l-arrHeadLenReal,NaN,l-arrHeadLenReal,l];
+            end
             % Transformation:
             xs1 = X+xsr1*cos(alpha)+ysr1*sin(alpha);
             ys1 = Y+xsr1*sin(alpha)-ysr1*cos(alpha);
@@ -65,7 +115,12 @@ classdef force < handle
             %% Plot:
             obj.handl = cell(2,1);
             obj.handl{1} = plot(xs1,ys1,'.-','Color',color,'LineWidth',lw,'MarkerSize',ms,'MarkerIndices',1,'buttondownfcn',{@Mouse_Callback,'drag',obj});
-            obj.handl{2} = plot(xs2,ys2,'-','Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
+            if obj.arrowFilled
+                obj.handl{2} = fill(xs2,ys2,color,'LineStyle','-','FaceColor',color,'EdgeColor','none',...
+                    'LineJoin','miter','LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
+            else
+                obj.handl{2} = plot(xs2,ys2,'-','Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
+            end
             
             %% Callback function:
             function Mouse_Callback(hObj,~,action,sObj)
@@ -180,8 +235,37 @@ classdef force < handle
             % Referenzpfeil:
             xsr1 = [0,0.9*l];
             ysr1 = [0,0];
-            xsr2 = [0.9*l,l,max([0,l-obj.b/(2*tan(obj.fsw))]),NaN,max([0,l-obj.b/(2*tan(obj.fsw))]),l];
-            ysr2 = [0,0,+obj.b/2,NaN,-obj.b/2,0];
+            arrHeadLenMax = obj.b/(2*tan(obj.fsw));
+            arrHeadLenReal = min([arrHeadLenMax,l]);
+            if arrHeadLenReal < arrHeadLenMax
+                bReal = 2 * arrHeadLenReal * tan(obj.fsw);
+            else
+                bReal = obj.b;
+            end
+            if obj.arrowFilled
+                if obj.arrowRounded
+                    N = max(bReal*30,30);
+                    yr = linspace(bReal/2,-bReal/2,N);
+                    ysr2 = [0, yr, 0];
+                else
+                    ysr2 = [0,+bReal/2,-bReal/2,0];
+                end
+            else
+                ysr2 = [0,0,+bReal/2,NaN,-bReal/2,0];
+            end
+            if obj.arrowFilled
+                if obj.arrowRounded
+                    xMiddle = l-(1-obj.arrowRoundness)*arrHeadLenReal;
+                    xEnd = l-arrHeadLenReal;
+                    
+                    xr = (xEnd - xMiddle)/(bReal/2)^2*yr.^2 + xMiddle;
+                    xsr2 = [l, xr, l];
+                else
+                    xsr2 = [l,l-arrHeadLenReal,l-arrHeadLenReal,l];
+                end
+            else
+                xsr2 = [0.9*l,l,l-arrHeadLenReal,NaN,l-arrHeadLenReal,l];
+            end
             % Transformation:
             xs1 = X+xsr1*cos(alpha)+ysr1*sin(alpha);
             ys1 = Y+xsr1*sin(alpha)-ysr1*cos(alpha);

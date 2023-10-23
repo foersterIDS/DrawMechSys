@@ -22,6 +22,11 @@ classdef torque < handle
     properties (Dependent)
         color
     end
+    properties (Access=private)
+        arrowFilled
+        arrowRounded
+        arrowRoundness = 0.2;
+    end
     
     methods
         function obj = torque(X,Y,b,r,value,maxvalue,varargin)
@@ -37,6 +42,8 @@ classdef torque < handle
             obj.r = r;
             obj.b = b;
             obj.position = [X,Y];
+            obj.arrowRounded = false;
+            obj.arrowFilled = false;
             %% Input:
             if nargin>stdinp
                 i = 1;
@@ -65,6 +72,20 @@ classdef torque < handle
                             obj.window = varargin{i+1};
                             obj.id = varargin{i+2};
                             i = i+2;
+                        case 'filled'
+                            if strcmpi(varargin{i+1},'on')
+                                obj.arrowFilled = true;
+                            elseif strcmpi(varargin{i+1},'off')
+                                obj.arrowFilled = false;
+                            end
+                            i = i+1;
+                        case 'rounded'
+                            if strcmpi(varargin{i+1},'on')
+                                obj.arrowRounded = true;
+                            elseif strcmpi(varargin{i+1},'off')
+                                obj.arrowRounded = false;
+                            end
+                            i = i+1;
                         otherwise
                             error('No such element: %s',varargin{i});
                     end
@@ -74,6 +95,13 @@ classdef torque < handle
             %% Calc:
             dalpha = obj.dAlphaMax*sgn(obj.value)*abs(obj.value/obj.maxvalue);
             l = abs(2*dalpha*obj.r);
+            arrHeadLenMax = obj.b/(2*tan(obj.fsw));
+            arrHeadLenReal = min([arrHeadLenMax,l]);
+            if arrHeadLenReal < arrHeadLenMax
+                bReal = 2 * arrHeadLenReal * tan(obj.fsw);
+            else
+                bReal = obj.b;
+            end
             % Referenzpfeil:
 %             xsr = sign(dalpha)*[linspace(0,l,obj.Nu),linspace(l,max([0,l-obj.b/(2*tan(obj.fsw))]),obj.Nu),NaN,linspace(max([0,l-obj.b/(2*tan(obj.fsw))]),l,obj.Nu)];
 %             ysr = [linspace(0,0,obj.Nu),linspace(0,+obj.b/2,obj.Nu),NaN,linspace(-obj.b/2,0,obj.Nu)];
@@ -81,8 +109,22 @@ classdef torque < handle
             ysr1 = linspace(0,0,obj.Nu);
             xsrMid = sign(dalpha)*linspace(l*0.1,l*0.9,obj.Nu);
             ysrMid = linspace(0,0,obj.Nu);
-            xsr2 = sign(dalpha)*[linspace(l*0.9,l,obj.Nu),linspace(l,max([0,l-obj.b/(2*tan(obj.fsw))]),obj.Nu),NaN,linspace(max([0,l-obj.b/(2*tan(obj.fsw))]),l,obj.Nu)];
-            ysr2 = [linspace(0,0,obj.Nu),linspace(0,+obj.b/2,obj.Nu),NaN,linspace(-obj.b/2,0,obj.Nu)];
+            if obj.arrowFilled
+                if obj.arrowRounded
+                    yr = linspace(bReal/2,-bReal/2,obj.Nu);
+                    xMiddle = l-(1-obj.arrowRoundness)*arrHeadLenReal;
+                    xEnd = l-arrHeadLenReal;
+                    xr = (xEnd - xMiddle)/(bReal/2)^2*yr.^2 + xMiddle;
+                    ysr2 = [linspace(0,+bReal/2,obj.Nu), yr(2:end-1), linspace(-bReal/2,0,obj.Nu)];
+                    xsr2 = sign(dalpha)*[linspace(l,max([0,l-bReal/(2*tan(obj.fsw))]),obj.Nu), xr(2:end-1), linspace(max([0,l-bReal/(2*tan(obj.fsw))]),l,obj.Nu)];
+                else
+                    xsr2 = sign(dalpha)*[linspace(l,max([0,l-bReal/(2*tan(obj.fsw))]),obj.Nu),linspace(max([0,l-bReal/(2*tan(obj.fsw))]),l,obj.Nu)];
+                    ysr2 = [linspace(0,+bReal/2,obj.Nu),linspace(-bReal/2,0,obj.Nu)];
+                end
+            else
+                xsr2 = sign(dalpha)*[linspace(l*0.9,l,obj.Nu),linspace(l,max([0,l-bReal/(2*tan(obj.fsw))]),obj.Nu),NaN,linspace(max([0,l-bReal/(2*tan(obj.fsw))]),l,obj.Nu)];
+                ysr2 = [linspace(0,0,obj.Nu),linspace(0,+bReal/2,obj.Nu),NaN,linspace(-bReal/2,0,obj.Nu)];
+            end
             % Transformation:
 %             xs = X+(obj.r+ysr).*cos(obj.alpha0+xsr./(2*obj.r));
 %             ys = Y+(obj.r+ysr).*sin(obj.alpha0+xsr./(2*obj.r));
@@ -95,7 +137,13 @@ classdef torque < handle
             %% Plot:
             obj.plm = plot(xsMid,ysMid,'-','Color',co,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'downm',obj});
             obj.pll = plot(xs1,ys1,'.-','Color',co,'LineWidth',lw,'MarkerIndices',1,'buttondownfcn',{@Mouse_Callback,'downl',obj});
-            obj.plr = plot(xs2,ys2,'.-','Color',co,'LineWidth',lw,'MarkerIndices',2,'buttondownfcn',{@Mouse_Callback,'downr',obj});
+            if obj.arrowFilled
+                obj.plr = fill(xs2,ys2,co,'LineStyle','-','FaceColor',co,'EdgeColor','none',...
+                    'LineJoin','miter','LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
+            else
+                obj.plr = plot(xs2,ys2,'.-','Color',co,'LineWidth',lw,'MarkerIndices',2,'buttondownfcn',{@Mouse_Callback,'downr',obj});
+            end
+            
             obj.handl = scatter(X,Y,'o','MarkerFaceColor','m','MarkerEdgeColor','m','LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'drag',obj}); % centerpunkt
             obj.handl.MarkerFaceAlpha = 0;
             obj.handl.MarkerEdgeAlpha = obj.visOn*obj.vis;
@@ -257,9 +305,16 @@ classdef torque < handle
             %% Calc:
             dalpha = obj.dAlphaMax*sgn(obj.value)*abs(obj.value/obj.maxvalue);
             l = abs(2*dalpha*obj.r);
+            arrHeadLenMax = obj.b/(2*tan(obj.fsw));
+            arrHeadLenReal = min([arrHeadLenMax,l]);
+            if arrHeadLenReal < arrHeadLenMax
+                bReal = 2 * arrHeadLenReal * tan(obj.fsw);
+            else
+                bReal = obj.b;
+            end
             % Referenzpfeil:
-            xsr = sign(dalpha)*[linspace(0,l,obj.Nu),linspace(l,max([0,l-obj.b/(2*tan(obj.fsw))]),obj.Nu),NaN,linspace(max([0,l-obj.b/(2*tan(obj.fsw))]),l,obj.Nu)];
-            ysr = [linspace(0,0,obj.Nu),linspace(0,+obj.b/2,obj.Nu),NaN,linspace(-obj.b/2,0,obj.Nu)];
+            xsr = sign(dalpha)*[linspace(0,l,obj.Nu),linspace(l,max([0,l-bReal/(2*tan(obj.fsw))]),obj.Nu),NaN,linspace(max([0,l-bReal/(2*tan(obj.fsw))]),l,obj.Nu)];
+            ysr = [linspace(0,0,obj.Nu),linspace(0,+bReal/2,obj.Nu),NaN,linspace(-bReal/2,0,obj.Nu)];
             % Transformation:
             xs = X+(obj.r+ysr).*cos(obj.alpha0+xsr./(2*obj.r));
             ys = Y+(obj.r+ysr).*sin(obj.alpha0+xsr./(2*obj.r));
@@ -276,8 +331,22 @@ classdef torque < handle
             ysr1 = linspace(0,0,obj.Nu);
             xsrMid = sign(dalpha)*linspace(l*0.1,l*0.9,obj.Nu);
             ysrMid = linspace(0,0,obj.Nu);
-            xsr2 = sign(dalpha)*[linspace(l*0.9,l,obj.Nu),linspace(l,max([0,l-obj.b/(2*tan(obj.fsw))]),obj.Nu),NaN,linspace(max([0,l-obj.b/(2*tan(obj.fsw))]),l,obj.Nu)];
-            ysr2 = [linspace(0,0,obj.Nu),linspace(0,+obj.b/2,obj.Nu),NaN,linspace(-obj.b/2,0,obj.Nu)];
+            if obj.arrowFilled
+                if obj.arrowRounded
+                    yr = linspace(bReal/2,-bReal/2,obj.Nu);
+                    xMiddle = l-(1-obj.arrowRoundness)*arrHeadLenReal;
+                    xEnd = l-arrHeadLenReal;
+                    xr = (xEnd - xMiddle)/(bReal/2)^2*yr.^2 + xMiddle;
+                    ysr2 = [linspace(0,+bReal/2,obj.Nu), yr(2:end-1), linspace(-bReal/2,0,obj.Nu)];
+                    xsr2 = sign(dalpha)*[linspace(l,max([0,l-bReal/(2*tan(obj.fsw))]),obj.Nu), xr(2:end-1), linspace(max([0,l-bReal/(2*tan(obj.fsw))]),l,obj.Nu)];
+                else
+                    xsr2 = sign(dalpha)*[linspace(l,max([0,l-bReal/(2*tan(obj.fsw))]),obj.Nu),linspace(max([0,l-bReal/(2*tan(obj.fsw))]),l,obj.Nu)];
+                    ysr2 = [linspace(0,+bReal/2,obj.Nu),linspace(-bReal/2,0,obj.Nu)];
+                end
+            else
+                xsr2 = sign(dalpha)*[linspace(l*0.9,l,obj.Nu),linspace(l,max([0,l-bReal/(2*tan(obj.fsw))]),obj.Nu),NaN,linspace(max([0,l-bReal/(2*tan(obj.fsw))]),l,obj.Nu)];
+                ysr2 = [linspace(0,0,obj.Nu),linspace(0,+bReal/2,obj.Nu),NaN,linspace(-bReal/2,0,obj.Nu)];
+            end
             %% Transformation:
 %             xs = X+(obj.r+ysr).*cos(obj.alpha0+xsr./(2*obj.r));
 %             ys = Y+(obj.r+ysr).*sin(obj.alpha0+xsr./(2*obj.r));
