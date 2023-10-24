@@ -7,10 +7,10 @@ function f = createWindow(xLimits,yLimits,yResolution,NameValueArgs)
         yLimits (1,2) double
         yResolution (1,1) double {mustBeInteger,mustBeGreaterThan(yResolution,0)}
         NameValueArgs.grid (1,:) char {mustBeMember(NameValueArgs.grid,{'on','off'})} = 'off'
-        NameValueArgs.gridcolor (1,3) double = 233/255*[1,1,1]
+        NameValueArgs.gridcolor (1,:) = 233/255*[1,1,1]
         NameValueArgs.gridx (1,1) double = 1
         NameValueArgs.gridy (1,1) double = 1
-        NameValueArgs.backcolor (1,3) double = [1,1,1]
+        NameValueArgs.backcolor (1,:) = [1,1,1]
         NameValueArgs.figure (1,1) double {mustBeInteger,mustBeGreaterThan(NameValueArgs.figure,0)}
         NameValueArgs.gridlinewidth (1,1) double {mustBePositive} = 2
     end
@@ -22,11 +22,11 @@ function f = createWindow(xLimits,yLimits,yResolution,NameValueArgs)
         nfig = NameValueArgs.figure;
     end
     gridon = strcmp(NameValueArgs.grid,'on');
-    gridcolor = NameValueArgs.gridcolor;
+    gridcolor = getRGB(NameValueArgs.gridcolor);
     gridx = NameValueArgs.gridx;
     gridy = NameValueArgs.gridy;
     glw = NameValueArgs.gridlinewidth;
-    backcolor = NameValueArgs.backcolor;
+    backcolor = getRGB(NameValueArgs.backcolor);
     %% get screen resolution
     set(groot,'Units','pixels');
     mScreenSize = get(groot,'ScreenSize'); % scaled pixels

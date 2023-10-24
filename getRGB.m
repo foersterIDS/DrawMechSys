@@ -42,6 +42,9 @@ function [ rgb ] = getRGB( value, maxValue, minValue, cmName )
             otherwise
                 error('unknown color');
         end
+    elseif nargin==1 && isa(value,'double') && numel(value)==3
+        value = value(:).';
+        rgb = max([0,0,0],min(value,[1,1,1]));
     else
         if nargin<4
             cmName = 'viridis';
