@@ -36,9 +36,9 @@ classdef DrawMechSysObject < handle
                 'matlab.graphics.chart.primitive.Line','matlab.graphics.chart.primitive.Scatter'};
             if any(strcmp(class(objectToChange), allowedClasses)) && isprop(objectToChange,'Visible')
                 if val
-                    objectToChange(jj).Visible = 'on';
+                    objectToChange.Visible = 'on';
                 else
-                    objectToChange(jj).Visible = 'off';
+                    objectToChange.Visible = 'off';
                 end
             else
                 if isa(objectToChange, 'gfx2d.DrawMechSysObject') || any(strcmp(class(objectToChange), allowedClasses))
