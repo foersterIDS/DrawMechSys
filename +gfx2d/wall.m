@@ -287,7 +287,9 @@ classdef wall < gfx2d.LineObject
             delete(obj.plotHandle{2});
             delete(obj.plotHandle{3});
             delete(obj.plotHandle{4});
-            obj.window.deleteObject(obj.id);
+            if ~isempty(obj.window)
+                obj.window.deleteObject(obj.id);
+            end
         end
         
         function changeDirection(obj)

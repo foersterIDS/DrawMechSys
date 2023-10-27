@@ -1,4 +1,4 @@
-classdef RigidBody < handle
+classdef RigidBody < gfx2d.DrawMechSysObject
     
     properties
         position

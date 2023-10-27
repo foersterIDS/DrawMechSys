@@ -1,4 +1,4 @@
-classdef rotwall < handle
+classdef rotwall < gfx2d.DrawMechSysObject
     
     properties
         window

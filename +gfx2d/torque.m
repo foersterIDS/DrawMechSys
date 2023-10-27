@@ -1,4 +1,4 @@
-classdef torque < handle
+classdef torque < gfx2d.DrawMechSysObject
     
     properties
         window
@@ -16,6 +16,8 @@ classdef torque < handle
         plm
         pll
         plr
+        scl
+        scr
         vis = 0.3;
         visOn = 0;
     end
@@ -34,6 +36,7 @@ classdef torque < handle
             stdinp = 6;
             co = [0,0,0];
             lw = 3;
+            ms = 1*lw;
             obj.fsw = 20*(2*pi/360); % Pfeilspitzenwinkel (einseitig)
             obj.alpha0 = 0;
             obj.dAlphaMax = 2*pi;
@@ -136,12 +139,14 @@ classdef torque < handle
             ys2 = Y+(obj.r+ysr2).*sin(obj.alpha0+xsr2./(2*obj.r));
             %% Plot:
             obj.plm = plot(xsMid,ysMid,'-','Color',co,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'downm',obj});
-            obj.pll = plot(xs1,ys1,'.-','Color',co,'LineWidth',lw,'MarkerIndices',1,'buttondownfcn',{@Mouse_Callback,'downl',obj});
+            obj.pll = plot(xs1,ys1,'-','Color',co,'LineWidth',lw,'MarkerIndices',1,'buttondownfcn',{@Mouse_Callback,'downl',obj});
+            obj.scl = scatter(xsr1,ysr1,ms,co,"filled","MarkerEdgeColor",'none',"MarkerFaceColor",co,"LineWidth",lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
             if obj.arrowFilled
                 obj.plr = fill(xs2,ys2,co,'LineStyle','-','FaceColor',co,'EdgeColor','none',...
                     'LineJoin','miter','LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
             else
-                obj.plr = plot(xs2,ys2,'.-','Color',co,'LineWidth',lw,'MarkerIndices',2,'buttondownfcn',{@Mouse_Callback,'downr',obj});
+                obj.plr = plot(xs2,ys2,'-','Color',co,'LineWidth',lw,'MarkerIndices',2,'buttondownfcn',{@Mouse_Callback,'downr',obj});
+                obj.scr = scatter(xs2,ys2,ms,co,"filled","MarkerEdgeColor",'none',"MarkerFaceColor",co,"LineWidth",lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
             end
             
             obj.handl = scatter(X,Y,'o','MarkerFaceColor','m','MarkerEdgeColor','m','LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'drag',obj}); % centerpunkt
@@ -247,6 +252,38 @@ classdef torque < handle
             plrcontext2 = uimenu(plrcontext,'Label','bind','Callback',{@ct_bind,obj,2});
             plrcontext3 = uimenu(plrcontext,'Label','set position','Callback',{@ct_setposition,obj,2});
             plrcontext4 = uimenu(plrcontext,'Label','delete','Callback',{@ct_delete,obj});
+            % l:
+            sclcontext = uicontextmenu;
+            obj.scl.UIContextMenu = sclcontext;
+            sclcontext1 = uimenu(sclcontext,'Label','change color');
+            sclcontext1_1 = uimenu('Parent',sclcontext1,'Label','blue','Callback',{@ct_setcolor,obj});
+            sclcontext1_2 = uimenu('Parent',sclcontext1,'Label','red','Callback',{@ct_setcolor,obj});
+            sclcontext1_3 = uimenu('Parent',sclcontext1,'Label','magenta','Callback',{@ct_setcolor,obj});
+            sclcontext1_4 = uimenu('Parent',sclcontext1,'Label','green','Callback',{@ct_setcolor,obj});
+            sclcontext1_5 = uimenu('Parent',sclcontext1,'Label','yellow','Callback',{@ct_setcolor,obj});
+            sclcontext1_6 = uimenu('Parent',sclcontext1,'Label','black','Callback',{@ct_setcolor,obj});
+            sclcontext1_7 = uimenu('Parent',sclcontext1,'Label','white','Callback',{@ct_setcolor,obj});
+            sclcontext1_8 = uimenu('Parent',sclcontext1,'Label','random','Callback',{@ct_setcolor,obj});
+            sclcontext2 = uimenu(sclcontext,'Label','bind','Callback',{@ct_bind,obj,1});
+            sclcontext3 = uimenu(sclcontext,'Label','set position','Callback',{@ct_setposition,obj,1});
+            sclcontext4 = uimenu(sclcontext,'Label','delete','Callback',{@ct_delete,obj});
+            % r:
+            if ~obj.arrowFilled
+                scrcontext = uicontextmenu;
+                obj.scr.UIContextMenu = scrcontext;
+                scrcontext1 = uimenu(scrcontext,'Label','change color');
+                scrcontext1_1 = uimenu('Parent',scrcontext1,'Label','blue','Callback',{@ct_setcolor,obj});
+                scrcontext1_2 = uimenu('Parent',scrcontext1,'Label','red','Callback',{@ct_setcolor,obj});
+                scrcontext1_3 = uimenu('Parent',scrcontext1,'Label','magenta','Callback',{@ct_setcolor,obj});
+                scrcontext1_4 = uimenu('Parent',scrcontext1,'Label','green','Callback',{@ct_setcolor,obj});
+                scrcontext1_5 = uimenu('Parent',scrcontext1,'Label','yellow','Callback',{@ct_setcolor,obj});
+                scrcontext1_6 = uimenu('Parent',scrcontext1,'Label','black','Callback',{@ct_setcolor,obj});
+                scrcontext1_7 = uimenu('Parent',scrcontext1,'Label','white','Callback',{@ct_setcolor,obj});
+                scrcontext1_8 = uimenu('Parent',scrcontext1,'Label','random','Callback',{@ct_setcolor,obj});
+                scrcontext2 = uimenu(scrcontext,'Label','bind','Callback',{@ct_bind,obj,2});
+                scrcontext3 = uimenu(scrcontext,'Label','set position','Callback',{@ct_setposition,obj,2});
+                scrcontext4 = uimenu(scrcontext,'Label','delete','Callback',{@ct_delete,obj});
+            end
             % c:
             handlcontext = uicontextmenu;
             obj.handl.UIContextMenu = handlcontext;
@@ -363,6 +400,12 @@ classdef torque < handle
             obj.pll.YData = ys1;
             obj.plr.XData = xs2;
             obj.plr.YData = ys2;
+            obj.scl.XData = xs1;
+            obj.scl.YData = ys1;
+            if ~ obj.arrowFilled
+                obj.scr.XData = xs2;
+                obj.scr.YData = ys2;
+            end
             obj.handl.XData = X;
             obj.handl.YData = Y;
         end
@@ -381,6 +424,10 @@ classdef torque < handle
             delete(obj.pll);
             delete(obj.plm);
             delete(obj.plr);
+            delete(obj.scl);
+            if ~obj.arrowFilled
+                delete(obj.scr);
+            end
             delete(obj.handl);
             obj.window.deleteObject(obj.id);
         end
@@ -389,6 +436,12 @@ classdef torque < handle
             obj.pll.Color = newcolor;
             obj.plm.Color = newcolor;
             obj.plr.Color = newcolor;
+            obj.scl.MarkerEdgeColor = newcolor;
+            obj.scl.MarkerFaceColor = newcolor;
+            if ~obj.arrowFilled
+                obj.scr.MarkerEdgeColor = newcolor;
+                obj.scr.MarkerFaceColor = newcolor;
+            end
         end
         
         function col = get.color(obj)

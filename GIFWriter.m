@@ -4,32 +4,26 @@ classdef GIFWriter < handle
         fps
         path
         name
-        loops = inf; % Anzahl Schleifendurchläufe; 0 entspricht einem Durchlauf; inf führt zu Dauerschleife
+        loops % Anzahl Schleifendurchläufe; 0 entspricht einem Durchlauf; inf führt zu Dauerschleife
         first = 1;
         write = 1;
     end
     
     methods
-        function obj = GIFWriter(name,fps,varargin)
-            stdinp = 2;
-            obj.name = name;
-            obj.fps = fps;
-            obj.path = [pwd,'\'];
-            if nargin>stdinp
-                i = 1;
-                while i<=nargin-stdinp
-                    switch lower(varargin{i})
-                        case 'path'
-                            obj.path = varargin{i+1};
-                            i = i+2;
-                        case 'loops'
-                            obj.loops = varargin{i+1};
-                            i = i+2;
-                        otherwise
-                            error('No such option!');
-                    end
-                end
+        function obj = GIFWriter(name,NameValueArgs)
+            arguments
+                name (1,:) char {mustBeTextScalar}
+                NameValueArgs.fps (1,1) double {mustBeInteger,mustBePositive} = 30;
+                NameValueArgs.path (1,:) char {mustBeTextScalar}
+                NameValueArgs.loops (1,1) double {mustBeGreaterThanOrEqual(NameValueArgs.loops,0),mustBeIntegerOrInf} = inf;
             end
+            obj.name = name;
+            obj.fps = NameValueArgs.fps;
+            obj.path = [pwd,'\'];
+            if isfield(NameValueArgs,'path')
+                obj.path = NameValueArgs.path;
+            end
+            obj.loops = NameValueArgs.loops;
             obj.filename = [obj.path,obj.name,'.gif'];
         end
         
@@ -75,3 +69,10 @@ classdef GIFWriter < handle
     end
 end
 
+function mustBeIntegerOrInf(val)
+    if ~isinf(val) && ~(val == round(val))
+        eidType = 'mustBeIntegerOrInf:notIntegerOrInf';
+        msgType = 'Value must be a integer or inf.';
+        throwAsCaller(MException(eidType,msgType))
+    end
+end

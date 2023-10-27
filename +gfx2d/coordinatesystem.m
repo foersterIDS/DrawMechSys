@@ -1,4 +1,4 @@
-classdef coordinatesystem < handle
+classdef coordinatesystem < gfx2d.DrawMechSysObject
     
     properties
         window

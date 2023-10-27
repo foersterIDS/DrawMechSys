@@ -11,9 +11,13 @@ classdef nonlinspring < gfx2d.LineObject
         plm
         pll
         plr
+        scl
+        scr
         plmcontext
         pllcontext
         plrcontext
+        sclcontext
+        scrcontext
     end
     properties (Dependent)
         color
@@ -100,9 +104,11 @@ classdef nonlinspring < gfx2d.LineObject
             ysr = Y(1)+sgn(X(2)-X(1))*(xsrr*sin(alpha)-ysrr*cos(alpha));
             % plot:
             obj.plm = plot(xsm,ysm,'-','Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'drag',obj});
-            obj.pll = plot(xsl,ysl,'.-','MarkerSize',ms,'Color',color,'LineWidth',lw,'MarkerIndices',2,'buttondownfcn',{@Mouse_Callback,'down',obj});
-            obj.plr = plot(xsr,ysr,'.-','MarkerSize',ms,'Color',color,'LineWidth',lw,'MarkerIndices',1,'buttondownfcn',{@Mouse_Callback,'down',obj});
+            obj.pll = plot(xsl,ysl,'-','MarkerSize',ms,'Color',color,'LineWidth',lw,'MarkerIndices',2,'buttondownfcn',{@Mouse_Callback,'down',obj});
+            obj.scl = scatter(xsl,ysl,ms,color,"filled","MarkerEdgeColor",'none',"MarkerFaceColor",obj.color,"LineWidth",lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
             
+            obj.plr = plot(xsr,ysr,'-','MarkerSize',ms,'Color',color,'LineWidth',lw,'MarkerIndices',1,'buttondownfcn',{@Mouse_Callback,'down',obj});
+            obj.scr = scatter(xsr,ysr,ms,color,"filled","MarkerEdgeColor",'none',"MarkerFaceColor",obj.color,"LineWidth",lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
             %% Callback function:
             function Mouse_Callback(hObj,~,action,sObj)
                 persistent curobj xdata ydata ind xdatarel ydatarel
@@ -188,10 +194,42 @@ classdef nonlinspring < gfx2d.LineObject
             plrcontext2 = uimenu(plrcontext,'Label','bind','Callback',{@ct_bind,obj,2});
             plrcontext3 = uimenu(plrcontext,'Label','set position','Callback',{@ct_setposition,obj,2});
             plrcontext4 = uimenu(plrcontext,'Label','delete','Callback',{@ct_delete,obj});
+            %l
+            sclcontext = uicontextmenu;
+            obj.scl.UIContextMenu = sclcontext;
+            sclcontext1 = uimenu(sclcontext,'Label','change color');
+            sclcontext1_1 = uimenu('Parent',sclcontext1,'Label','blue','Callback',{@ct_setcolor,obj});
+            sclcontext1_2 = uimenu('Parent',sclcontext1,'Label','red','Callback',{@ct_setcolor,obj});
+            sclcontext1_3 = uimenu('Parent',sclcontext1,'Label','magenta','Callback',{@ct_setcolor,obj});
+            sclcontext1_4 = uimenu('Parent',sclcontext1,'Label','green','Callback',{@ct_setcolor,obj});
+            sclcontext1_5 = uimenu('Parent',sclcontext1,'Label','yellow','Callback',{@ct_setcolor,obj});
+            sclcontext1_6 = uimenu('Parent',sclcontext1,'Label','black','Callback',{@ct_setcolor,obj});
+            sclcontext1_7 = uimenu('Parent',sclcontext1,'Label','white','Callback',{@ct_setcolor,obj});
+            sclcontext1_8 = uimenu('Parent',sclcontext1,'Label','random','Callback',{@ct_setcolor,obj});
+            sclcontext2 = uimenu(sclcontext,'Label','bind','Callback',{@ct_bind,obj,1});
+            sclcontext3 = uimenu(sclcontext,'Label','set position','Callback',{@ct_setposition,obj,1});
+            sclcontext4 = uimenu(sclcontext,'Label','delete','Callback',{@ct_delete,obj});
+            % r:
+            scrcontext = uicontextmenu;
+            obj.scr.UIContextMenu = scrcontext;
+            scrcontext1 = uimenu(scrcontext,'Label','change color');
+            scrcontext1_1 = uimenu('Parent',scrcontext1,'Label','blue','Callback',{@ct_setcolor,obj});
+            scrcontext1_2 = uimenu('Parent',scrcontext1,'Label','red','Callback',{@ct_setcolor,obj});
+            scrcontext1_3 = uimenu('Parent',scrcontext1,'Label','magenta','Callback',{@ct_setcolor,obj});
+            scrcontext1_4 = uimenu('Parent',scrcontext1,'Label','green','Callback',{@ct_setcolor,obj});
+            scrcontext1_5 = uimenu('Parent',scrcontext1,'Label','yellow','Callback',{@ct_setcolor,obj});
+            scrcontext1_6 = uimenu('Parent',scrcontext1,'Label','black','Callback',{@ct_setcolor,obj});
+            scrcontext1_7 = uimenu('Parent',scrcontext1,'Label','white','Callback',{@ct_setcolor,obj});
+            scrcontext1_8 = uimenu('Parent',scrcontext1,'Label','random','Callback',{@ct_setcolor,obj});
+            scrcontext2 = uimenu(scrcontext,'Label','bind','Callback',{@ct_bind,obj,2});
+            scrcontext3 = uimenu(scrcontext,'Label','set position','Callback',{@ct_setposition,obj,2});
+            scrcontext4 = uimenu(scrcontext,'Label','delete','Callback',{@ct_delete,obj});
 
             obj.plmcontext = plmcontext;
             obj.pllcontext = pllcontext;
             obj.plrcontext = plrcontext;
+            obj.sclcontext = sclcontext;
+            obj.scrcontext = scrcontext;
             
             %% Context functions:
             function ct_setcolor(src,event,curobj)
@@ -241,6 +279,8 @@ classdef nonlinspring < gfx2d.LineObject
                 delete(obj.plm);
                 delete(obj.pll);
                 delete(obj.plr);
+                delete(obj.scl);
+                delete(obj.scr);
             end
         end
         
@@ -284,6 +324,10 @@ classdef nonlinspring < gfx2d.LineObject
             obj.pll.YData = ysl;
             obj.plr.XData = xsr;
             obj.plr.YData = ysr;
+            obj.scl.XData = xsl;
+            obj.scl.YData = ysl;
+            obj.scr.XData = xsr;
+            obj.scr.YData = ysr;
             
             obj.p1 = [X(1);Y(1)];
             obj.p2 = [X(2);Y(2)];
@@ -294,6 +338,10 @@ classdef nonlinspring < gfx2d.LineObject
             obj.plm.Color = newcolor;
             obj.pll.Color = newcolor;
             obj.plr.Color = newcolor;
+            obj.scl.MarkerEdgeColor = newcolor;
+            obj.scl.MarkerFaceColor = newcolor;
+            obj.scr.MarkerEdgeColor = newcolor;
+            obj.scr.MarkerFaceColor = newcolor;
         end
         
         function col = get.color(obj)

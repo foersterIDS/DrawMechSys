@@ -1,4 +1,4 @@
-classdef trail < handle
+classdef trail < gfx2d.DrawMechSysObject
    
     properties
         window

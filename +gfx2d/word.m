@@ -1,4 +1,4 @@
-classdef word < handle
+classdef word < gfx2d.DrawMechSysObject
     
     properties
         window

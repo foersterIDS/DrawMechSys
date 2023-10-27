@@ -82,9 +82,11 @@ classdef damper < gfx2d.LineObject
             ysr = Y(1)+sgn(X(2)-X(1))*(obj.xsrr*sin(alpha)-obj.ysrr*cos(alpha));
             %% Plot:
             obj.handl = cell(3,1);
-            obj.handl{1} = plot(xsl,ysl,'.-','MarkerSize',ms,'MarkerIndices',1,'Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
+            obj.handl{1} = plot(xsl,ysl,'-','MarkerSize',ms,'MarkerIndices',1,'Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
             obj.handl{2} = plot(xsm,ysm,'-','Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'drag',obj});
-            obj.handl{3} = plot(xsr,ysr,'.-','MarkerSize',ms,'MarkerIndices',2,'Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
+            obj.handl{3} = plot(xsr,ysr,'-','MarkerSize',ms,'MarkerIndices',2,'Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
+            obj.handl{4} = scatter(xsl,ysl,ms,color,"filled","MarkerEdgeColor",'none',"MarkerFaceColor",color,"LineWidth",lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
+            obj.handl{5} = scatter(xsr,ysr,ms,color,"filled","MarkerEdgeColor",'none',"MarkerFaceColor",color,"LineWidth",lw,'buttondownfcn',{@Mouse_Callback,'down',obj});
             
             %% Callback function:
             function Mouse_Callback(hObj,~,action,sObj)
@@ -169,6 +171,36 @@ classdef damper < gfx2d.LineObject
             plrcontext2 = uimenu(plrcontext,'Label','bind','Callback',{@ct_bind,obj,2});
             plrcontext3 = uimenu(plrcontext,'Label','set position','Callback',{@ct_setposition,obj,2});
             plrcontext4 = uimenu(plrcontext,'Label','delete','Callback',{@ct_delete,obj});
+            % l:
+            sclcontext = uicontextmenu;
+            obj.handl{1}.UIContextMenu = sclcontext;
+            sclcontext1 = uimenu(sclcontext,'Label','change color');
+            sclcontext1_1 = uimenu('Parent',sclcontext1,'Label','blue','Callback',{@ct_setcolor,obj});
+            sclcontext1_2 = uimenu('Parent',sclcontext1,'Label','red','Callback',{@ct_setcolor,obj});
+            sclcontext1_3 = uimenu('Parent',sclcontext1,'Label','magenta','Callback',{@ct_setcolor,obj});
+            sclcontext1_4 = uimenu('Parent',sclcontext1,'Label','green','Callback',{@ct_setcolor,obj});
+            sclcontext1_5 = uimenu('Parent',sclcontext1,'Label','yellow','Callback',{@ct_setcolor,obj});
+            sclcontext1_6 = uimenu('Parent',sclcontext1,'Label','black','Callback',{@ct_setcolor,obj});
+            sclcontext1_7 = uimenu('Parent',sclcontext1,'Label','white','Callback',{@ct_setcolor,obj});
+            sclcontext1_8 = uimenu('Parent',sclcontext1,'Label','random','Callback',{@ct_setcolor,obj});
+            pllcontext2 = uimenu(sclcontext,'Label','bind','Callback',{@ct_bind,obj,1});
+            pllcontext3 = uimenu(sclcontext,'Label','set position','Callback',{@ct_setposition,obj,1});
+            pllcontext4 = uimenu(sclcontext,'Label','delete','Callback',{@ct_delete,obj});
+            % r:
+            scrcontext = uicontextmenu;
+            obj.handl{3}.UIContextMenu = scrcontext;
+            scrcontext1 = uimenu(scrcontext,'Label','change color');
+            scrcontext1_1 = uimenu('Parent',scrcontext1,'Label','blue','Callback',{@ct_setcolor,obj});
+            scrcontext1_2 = uimenu('Parent',scrcontext1,'Label','red','Callback',{@ct_setcolor,obj});
+            scrcontext1_3 = uimenu('Parent',scrcontext1,'Label','magenta','Callback',{@ct_setcolor,obj});
+            scrcontext1_4 = uimenu('Parent',scrcontext1,'Label','green','Callback',{@ct_setcolor,obj});
+            scrcontext1_5 = uimenu('Parent',scrcontext1,'Label','yellow','Callback',{@ct_setcolor,obj});
+            scrcontext1_6 = uimenu('Parent',scrcontext1,'Label','black','Callback',{@ct_setcolor,obj});
+            scrcontext1_7 = uimenu('Parent',scrcontext1,'Label','white','Callback',{@ct_setcolor,obj});
+            scrcontext1_8 = uimenu('Parent',scrcontext1,'Label','random','Callback',{@ct_setcolor,obj});
+            scrcontext2 = uimenu(scrcontext,'Label','bind','Callback',{@ct_bind,obj,2});
+            scrcontext3 = uimenu(scrcontext,'Label','set position','Callback',{@ct_setposition,obj,2});
+            scrcontext4 = uimenu(scrcontext,'Label','delete','Callback',{@ct_delete,obj});
             
             %% Context functions:
             function ct_setcolor(src,event,curobj)
@@ -229,7 +261,9 @@ classdef damper < gfx2d.LineObject
             set(obj.handl{1},'XData',xsl,'YData',ysl);
             set(obj.handl{2},'XData',xsm,'YData',ysm);
             set(obj.handl{3},'XData',xsr,'YData',ysr);
-            
+            set(obj.handl{4},'XData',xsl,'YData',ysl);
+            set(obj.handl{5},'XData',xsr,'YData',ysr);
+
             notify(obj,'changedPosition');
         end
         
@@ -237,6 +271,8 @@ classdef damper < gfx2d.LineObject
             delete(obj.handl{1});
             delete(obj.handl{2});
             delete(obj.handl{3});
+            delete(obj.handl{4});
+            delete(obj.handl{5});
             obj.window.deleteObject(obj.id);
         end
         
@@ -244,6 +280,10 @@ classdef damper < gfx2d.LineObject
             obj.handl{1}.Color = newcolor;
             obj.handl{2}.Color = newcolor;
             obj.handl{3}.Color = newcolor;
+            obj.handl{4}.MarkerEdgeColor = newcolor;
+            obj.handl{4}.MarkerFaceColor = newcolor;
+            obj.handl{5}.MarkerEdgeColor = newcolor;
+            obj.handl{4}.MarkerFaceColor = newcolor;
         end
         
         function col = get.color(obj)

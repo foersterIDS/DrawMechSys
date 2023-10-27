@@ -47,7 +47,7 @@ classdef mass < gfx2d.RigidBody
                     i = i+1;
                 end
             end
-            
+
             obj.xsr = [-b/2,+b/2,+b/2,-b/2,-b/2];
             obj.ysr = [+h/2,+h/2,-h/2,-h/2,+h/2];
             
@@ -170,7 +170,9 @@ classdef mass < gfx2d.RigidBody
         
         function delete(obj)
             delete(obj.pl);
-            obj.window.deleteObject(obj.id);
+            if ~isempty(obj.window)
+                obj.window.deleteObject(obj.id);
+            end
         end
         
         function set.color(obj,newcolor)

@@ -1,4 +1,4 @@
-classdef LineObject < handle
+classdef LineObject < gfx2d.DrawMechSysObject
     
     properties
         p1

@@ -1,4 +1,4 @@
-classdef PointObject < handle
+classdef PointObject < gfx2d.DrawMechSysObject
     
     properties
         position
