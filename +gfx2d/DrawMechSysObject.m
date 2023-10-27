@@ -32,26 +32,31 @@ classdef DrawMechSysObject < handle
                 objectToChange
                 val (1,1) logical
             end
-            allowedClasses = {'matlab.graphics.primitive.Patch','matlab.graphics.primitive.Text','matlab.graphics.chart.primitive.Line',...
-                'matlab.graphics.chart.primitive.Line','matlab.graphics.chart.primitive.Scatter'};
-            if any(strcmp(class(objectToChange), allowedClasses)) && isprop(objectToChange,'Visible')
-                if val
-                    objectToChange.Visible = 'on';
-                else
-                    objectToChange.Visible = 'off';
-                end
+            if val
+                gfx2d.DrawMechSysObject.changeObjAlpha(objectToChange,1);
             else
-                if isa(objectToChange, 'gfx2d.DrawMechSysObject') || any(strcmp(class(objectToChange), allowedClasses))
-                    fNames = properties(objectToChange);
-                    for kk = 1:length(fNames)
-                        gfx2d.DrawMechSysObject.changeObjVisibility(objectToChange.(fNames{kk}),val);
-                    end
-                elseif iscell(objectToChange)
-                    for kk = 1:length(objectToChange)
-                        gfx2d.DrawMechSysObject.changeObjVisibility(objectToChange{kk},val);
-                    end
-                end
+                gfx2d.DrawMechSysObject.changeObjAlpha(objectToChange,0);
             end
+            % allowedClasses = {'matlab.graphics.primitive.Patch','matlab.graphics.primitive.Text','matlab.graphics.chart.primitive.Line',...
+            %     'matlab.graphics.chart.primitive.Line','matlab.graphics.chart.primitive.Scatter'};
+            % if any(strcmp(class(objectToChange), allowedClasses)) && isprop(objectToChange,'Visible')
+            %     if val
+            %         objectToChange.Visible = 'on';
+            %     else
+            %         objectToChange.Visible = 'off';
+            %     end
+            % else
+            %     if isa(objectToChange, 'gfx2d.DrawMechSysObject') || any(strcmp(class(objectToChange), allowedClasses))
+            %         fNames = properties(objectToChange);
+            %         for kk = 1:length(fNames)
+            %             gfx2d.DrawMechSysObject.changeObjVisibility(objectToChange.(fNames{kk}),val);
+            %         end
+            %     elseif iscell(objectToChange)
+            %         for kk = 1:length(objectToChange)
+            %             gfx2d.DrawMechSysObject.changeObjVisibility(objectToChange{kk},val);
+            %         end
+            %     end
+            % end
         end
 
         function changeObjAlpha(objectToChange,val)
@@ -99,7 +104,14 @@ classdef DrawMechSysObject < handle
                     end
                 end
                 if isa(objectToChange,'matlab.graphics.primitive.Text')
-                    objectToChange.Color = (1-val) * [1,1,1];
+                    if val == 0
+                        objectToChange.Visible = 'off';
+                    else
+                        if strcmp(objectToChange.Visible,'off')
+                            objectToChange.Visible = 'on';
+                        end
+                        objectToChange.Color = (1-val) * [1,1,1];
+                    end
                 end
             else
                 if isa(objectToChange, 'gfx2d.DrawMechSysObject') || any(strcmp(class(objectToChange), allowedClasses))
