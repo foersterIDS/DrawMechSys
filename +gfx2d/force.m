@@ -4,13 +4,13 @@ classdef force < gfx2d.DrawMechSysObject
         window
         id
         p1
-        p2
+        vector
         fsw
         b
         handl
     end
     properties (Dependent)
-        vector
+        p2
         color
     end
     properties (Access=private)
@@ -29,7 +29,7 @@ classdef force < gfx2d.DrawMechSysObject
             obj.fsw = 20*(2*pi/360); % Pfeilspitzenwinkel (einseitig)
             obj.b = b;
             obj.p1 = [X;Y];
-            obj.p2 = obj.p1+vector;
+            obj.vector = vector;
             obj.arrowRounded = false;
             obj.arrowFilled = false;
             %% Input:
@@ -319,7 +319,6 @@ classdef force < gfx2d.DrawMechSysObject
                 obj.handl{4}.YData = ys2;
             end
             obj.p1 = [X;Y];
-            obj.p2 = obj.p1+obj.vector;
         end
         
         function delete(obj)
@@ -349,13 +348,13 @@ classdef force < gfx2d.DrawMechSysObject
         function col = get.color(obj)
             col = obj.handl{1}.Color;
         end
-        
-        function set.vector(obj,vector)
-            obj.p2 = obj.p1+vector;
+                
+        function p2 = get.p2(obj)
+            p2 = obj.p1 + obj.vector;
         end
-        
-        function vec = get.vector(obj)
-            vec = obj.p2-obj.p1;
+
+        function set.p2(obj,p2)
+            obj.vector = p2 - obj.p1;
         end
     end
 end
