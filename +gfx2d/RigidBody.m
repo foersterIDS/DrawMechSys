@@ -4,6 +4,7 @@ classdef RigidBody < gfx2d.DrawMechSysObject
         position
         angle = 0
         hgTransformHandle
+        currentScale = 1
     end
     events
         changedPosition
@@ -73,6 +74,35 @@ classdef RigidBody < gfx2d.DrawMechSysObject
             end
             
             obj.setPosition(t(1),t(2),0);
+        end
+
+        function scaleObject(obj,scale,NameValueArgs)
+            arguments
+                obj (1,1)
+                scale (1,1) double
+                NameValueArgs.type (1,:) char {mustBeMember(NameValueArgs.type,{'abs','rel'})} = 'rel'
+            end
+
+            if strcmp(NameValueArgs.type,'rel')
+                obj.currentScale = obj.currentScale * scale;
+                R = [scale, 0, 0;
+                 0,  scale, 0;
+                 0,    0, 1];
+                obj.hgTransformHandle.Matrix = obj.hgTransformHandle.Matrix*...
+                [R, zeros(3,1);
+                 zeros(1,3), 1];
+            else
+                oldScale = obj.currentScale;
+                obj.currentScale = scale;
+                scale = scale/oldScale;
+                R = [scale, 0, 0;
+                 0,  scale, 0;
+                 0,    0, 1];
+                obj.hgTransformHandle.Matrix = obj.hgTransformHandle.Matrix*...
+                [R, zeros(3,1);
+                 zeros(1,3), 1];
+            end
+            notify(obj,'changedPosition');
         end 
         
         function set.angle(obj,orientation)
