@@ -23,22 +23,26 @@ function [ rgb ] = getRGB( value, maxValue, minValue, cmName )
     value = value(:);
     if nargin==1 && isa(value,'char')
         switch value
-            case 'r'
-                rgb = [183,39,58]/255;
             case 'b'
                 rgb = [65,76,204]/255;
-            case 'g'
-                rgb = [65,163,52]/255;
-            case 'y'
-                rgb = [183,142,39]/255;
             case 'e'
                 rgb = [181,0,24]/255;
-            case 'p'
-                rgb = [0,20,204]/255;
+            case 'g'
+                rgb = [65,163,52]/255;
             case 'k'
                 rgb = [0,0,0]/255;
+            case 'm'
+                rgb = [255,0,144]/255;
+            case 'p'
+                rgb = [0,20,204]/255;
+            case 'r'
+                rgb = [183,39,58]/255;
+            case 'v'
+                rgb = [153,0,204]/255;
             case 'w'
                 rgb = [255,255,255]/255;
+            case 'y'
+                rgb = [183,142,39]/255;
             otherwise
                 error('unknown color');
         end
@@ -77,7 +81,7 @@ function [ rgb ] = getRGB( value, maxValue, minValue, cmName )
 end
 
 function valueInput(v)
-    allowedColors = {'r','b','g','y','e','p','k','w'};
+    allowedColors = {'b','e','g','k','m','p','r','v','w','y'};
     if ~isa(v,'double') && ~sum(strcmp(v,allowedColors))
         errStr = "Input must be double or be a char of:";
         for ii=1:numel(allowedColors)
