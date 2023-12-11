@@ -8,8 +8,6 @@ classdef word < gfx2d.DrawMechSysObject
         pl
         fs
         str
-    end
-    properties (Dependent)
         color
     end
     
@@ -204,10 +202,7 @@ classdef word < gfx2d.DrawMechSysObject
         
         function set.color(obj,newcolor)
             obj.pl.Color = newcolor;
-        end
-        
-        function col = get.color(obj)
-            col = obj.pl.Color;
+            obj.color = obj.pl.Color;
         end
     end
 end
