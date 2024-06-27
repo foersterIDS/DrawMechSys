@@ -429,7 +429,9 @@ classdef torque < gfx2d.DrawMechSysObject
                 delete(obj.scr);
             end
             delete(obj.handl);
-            obj.window.deleteObject(obj.id);
+            if ~isempty(obj.window)
+                obj.window.deleteObject(obj.id);
+            end
         end
         
         function set.color(obj,newcolor)
