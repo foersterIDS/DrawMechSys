@@ -204,7 +204,9 @@ classdef fixedbearing < gfx2d.RigidBody
             delete(obj.handl{1});
             delete(obj.handl{2});
             delete(obj.handl{3});
-            obj.window.deleteObject(obj.id);
+            if ~isempty(obj.window)
+                obj.window.deleteObject(obj.id);
+            end
         end
         
         function changeDirection(obj)
