@@ -29,6 +29,15 @@ classdef DrawMechSysObject < handle
             obj.changeObjAlpha(obj,val,bgColor);
             obj.alpha = val;
         end
+
+        function layer(obj,moveToLayer,step)
+            arguments
+                obj (1,1) gfx2d.DrawMechSysObject
+                moveToLayer (1,:) char {mustBeMember(moveToLayer,{'up','down','top','bottom'})}
+                step (1,1) double {mustBeInteger,mustBePositive} = 1;
+            end
+            obj.changeObjLayer(obj,moveToLayer,step);
+        end
     end
 
     methods (Static, Access = protected)
@@ -141,6 +150,33 @@ classdef DrawMechSysObject < handle
                 elseif iscell(objectToChange)
                     for kk = 1:length(objectToChange)
                         gfx2d.DrawMechSysObject.changeObjAlpha(objectToChange{kk},val,bgColor);
+                    end
+                end
+            end
+        end
+
+        function changeObjLayer(objectToMove,moveToLayer,step)
+            arguments
+                objectToMove
+                moveToLayer (1,:) char {mustBeMember(moveToLayer,{'up','down','top','bottom'})}
+                step (1,1) double {mustBeInteger,mustBePositive} = 1;
+            end
+            
+            if ~isempty(isgraphics(objectToMove)) && ~isa(objectToMove,'double') && isgraphics(objectToMove) 
+                if strcmp(moveToLayer,{'up','down'})
+                    uistack(objectToMove,moveToLayer,step)
+                else
+                    uistack(objectToMove,moveToLayer)
+                end
+            else
+                if isa(objectToMove, 'gfx2d.DrawMechSysObject')
+                    fNames = properties(objectToMove);
+                    for kk = 1:length(fNames)
+                        gfx2d.DrawMechSysObject.changeObjLayer(objectToMove.(fNames{kk}),moveToLayer,step);
+                    end
+                elseif iscell(objectToMove)
+                    for kk = 1:length(objectToMove)
+                        gfx2d.DrawMechSysObject.changeObjLayer(objectToMove{kk},moveToLayer,step);
                     end
                 end
             end
