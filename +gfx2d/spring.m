@@ -41,6 +41,7 @@ classdef spring < gfx2d.LineObject
             obj.lw = lw;
             ms = 1*lw;
             obj.ms = ms;
+            lJoin = 'round';
             %% Input:
             if nargin>stdinp
                 i = 1;
@@ -57,6 +58,9 @@ classdef spring < gfx2d.LineObject
                             i = i+1;
                         case 'markersize'
                             ms = varargin{i+1};
+                            i = i+1;
+                        case 'linejoin'
+                            lJoin = varargin{i+1};
                             i = i+1;
                         case 'window'
                             obj.window = varargin{i+1};
@@ -87,19 +91,19 @@ classdef spring < gfx2d.LineObject
             ysrMid = [-b 0 repmat([-b b],1,obj.n) 0 b]./2;
             
             obj.setPosition(X,Y);
-            obj.plm = plot(xsrMid,ysrMid,'-','Color',obj.color,'LineWidth',lw,'Parent',obj.handlMid,'buttondownfcn',{@Mouse_Callback,'drag',obj});
+            obj.plm = plot(xsrMid,ysrMid,'-','Color',obj.color,'LineWidth',lw,'Parent',obj.handlMid,'buttondownfcn',{@Mouse_Callback,'drag',obj},'LineJoin',lJoin);
             
             % Endstücke
             xsr1 = [-lmin, 0, -lmin]/2;
             ysr1 = [0,0,0]; % 3 Punkte, um abgerundete Linie zu bekommen -> keine Lücke zwischen mittlerer Sektion und Endstücken
             
-            obj.pll = plot(xsr1,ysr1,'-','MarkerSize',ms,'Color',obj.color,'LineWidth',lw,'MarkerIndices',1,'Parent',obj.handl1,'buttondownfcn',{@Mouse_Callback,'down',obj});
+            obj.pll = plot(xsr1,ysr1,'-','MarkerSize',ms,'Color',obj.color,'LineWidth',lw,'MarkerIndices',1,'Parent',obj.handl1,'buttondownfcn',{@Mouse_Callback,'down',obj},'LineJoin',lJoin);
             obj.scl = scatter(xsr1,ysr1,ms,obj.color,"filled","MarkerEdgeColor",'none',"MarkerFaceColor",obj.color,"LineWidth",lw,'Parent',obj.handl1,'buttondownfcn',{@Mouse_Callback,'down',obj});
             
             xsr2 = [lmin, 0, lmin]/2;
             ysr2 = [0,0,0];
             
-            obj.plr = plot(xsr2,ysr2,'-','MarkerSize',ms,'Color',obj.color,'LineWidth',lw,'MarkerIndices',1,'Parent',obj.handl2,'buttondownfcn',{@Mouse_Callback,'down',obj});
+            obj.plr = plot(xsr2,ysr2,'-','MarkerSize',ms,'Color',obj.color,'LineWidth',lw,'MarkerIndices',1,'Parent',obj.handl2,'buttondownfcn',{@Mouse_Callback,'down',obj},'LineJoin',lJoin);
             obj.scr = scatter(xsr2,ysr2,ms,obj.color,"filled","MarkerEdgeColor",'none',"MarkerFaceColor",obj.color,"LineWidth",lw,'Parent',obj.handl2,'buttondownfcn',{@Mouse_Callback,'down',obj});
             
             %% Callback function:
