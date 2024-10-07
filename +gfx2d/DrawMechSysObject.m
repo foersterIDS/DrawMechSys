@@ -162,7 +162,7 @@ classdef DrawMechSysObject < handle
                 step (1,1) double {mustBeInteger,mustBePositive} = 1;
             end
             
-            if ~isempty(isgraphics(objectToMove)) && ~isa(objectToMove,'double') && isgraphics(objectToMove) 
+            if ~isempty(objectToMove) && ~isa(objectToMove,'double') && ~iscell(objectToMove) && isgraphics(objectToMove) 
                 if strcmp(moveToLayer,{'up','down'})
                     uistack(objectToMove,moveToLayer,step)
                 else
