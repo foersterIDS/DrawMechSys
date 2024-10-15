@@ -4,9 +4,13 @@ classdef beam < gfx2d.RigidBody
         window
         id
         pl
+        plF = [];
         xPoints
         yPoints
         width
+        type (1,:) char {mustBeMember(type,{'linearized','realistic'})} = 'realistic'
+        length0
+        showNeutralFibre (1,1) logical
     end
     properties (Dependent)
         color
@@ -14,14 +18,18 @@ classdef beam < gfx2d.RigidBody
     end
     
     methods
-        function obj = beam(x0,y0,xPoints,yPoints,width,orientation,varargin)
+        function obj = beam(x0,y0,xPoints,yPoints,length0,width,orientation,varargin)
             %% Init:
             obj.xPoints = xPoints;
             obj.yPoints = yPoints;
+            obj.length0 = length0;
             obj.width = width;
-            stdinp = 6;
+            stdinp = 7;
             obj.color = [0,0,0];
             obj.facecolor = [1,1,1]*0.8;
+            obj.type = 'realistic';
+            obj.showNeutralFibre = false;
+            phi0 = 0;
             lw = 2;
             %% Input:
             if nargin>stdinp
@@ -41,6 +49,15 @@ classdef beam < gfx2d.RigidBody
                             obj.window = varargin{i+1};
                             obj.id = varargin{i+2};
                             i = i+2;
+                        case 'phi0'
+                            phi0 = varargin{i+1};
+                            i = i+1;
+                        case 'type'
+                            obj.type = varargin{i+1};
+                            i = i+1;
+                        case 'showneutralfibre'
+                            obj.showNeutralFibre = varargin{i+1};
+                            i = i+1;
                         otherwise
                             error('No such element: %s',varargin{i});
                     end
@@ -48,40 +65,16 @@ classdef beam < gfx2d.RigidBody
                 end
             end
 
-            s = [0,cumsum(sqrt(sum(diff([xPoints;yPoints],[],2).^2)))];
-            sI = linspace(0,s(end),max(100, length(s)));
-            for kk = 1:3
-                xI = interp1(s,xPoints,sI,"spline");
-                yI = interp1(s,yPoints,sI,"spline");
-                sI = [0,cumsum(sqrt(sum(diff([xI;yI],[],2).^2)))];
-            end
-
-            for kk = 1:length(sI)-1
-                n(:,kk) = [-(yI(kk+1) - yI(kk)); xI(kk+1) - xI(kk)];
-                n(:,kk) = n(:,kk) / norm(n(:,kk));
-            end
-
-            n = [n, n(:,end)];
-            
-            xF = [];
-            yF = [];
-            for kk = 1:length(sI)
-                xF = [xF, xI(kk) + width/2 * n(1,kk)];
-                yF = [yF, yI(kk) + width/2 * n(2,kk)];
-            end
-            
-            for kk = 1:length(sI)
-                xF = [xF, xI(end+1-kk) + width/2 * n(1,end+1-kk)];
-                yF = [yF, yI(end+1-kk) + -width/2 * n(2,end+1-kk)];
-            end
-            
-            xF = [xF, width/2 * n(1,1)];
-            yF = [yF, width/2 * n(2,1)];
+            [xF,yF,xNF,yNF] = calculateBeamPoints(xPoints,yPoints,obj.width,phi0,obj.type,obj.length0);
             
             obj.hgTransformHandle = hgtransform();
             obj.setPosition(x0,y0,orientation);
             obj.pl = fill(xF,yF,'','FaceColor',obj.facecolor,'EdgeColor',obj.color,'LineWidth',lw,'Parent',obj.hgTransformHandle,'buttondownfcn',{@Mouse_Callback,'drag',obj});
             
+            if obj.showNeutralFibre
+                obj.plF = plot(xNF,yNF,'--','LineWidth',lw,'Color',obj.color,'Parent',obj.hgTransformHandle,'buttondownfcn',{@Mouse_Callback,'drag',obj});
+            end
+
             %% Callback function:
             function Mouse_Callback(hObj,~,action,sObj)
                 persistent curobj xdata ydata ind xdatarel ydatarel
@@ -186,39 +179,17 @@ classdef beam < gfx2d.RigidBody
             end
         end
         
-        function updatePoints(obj,xPoints,yPoints)
-            lWidth = obj.width;
-            s = [0,cumsum(sqrt(sum(diff([xPoints;yPoints],[],2).^2)))];
-            sI = linspace(0,s(end),max(100, length(s)));
-            for kk = 1:3
-                xI = interp1(s,xPoints,sI,"spline");
-                yI = interp1(s,yPoints,sI,"spline");
-                sI = [0,cumsum(sqrt(sum(diff([xI;yI],[],2).^2)))];
+        function updatePoints(obj,xPoints,yPoints,phi0)
+            if nargin == 3
+                phi0 = 0;
             end
-
-            for kk = 1:length(sI)-1
-                n(:,kk) = [-(yI(kk+1) - yI(kk)); xI(kk+1) - xI(kk)];
-                n(:,kk) = n(:,kk) / norm(n(:,kk));
-            end
-
-            n = [n, n(:,end)];
-            
-            xF = [];
-            yF = [];
-            for kk = 1:length(sI)
-                xF = [xF, xI(kk) + lWidth/2 * n(1,kk)];
-                yF = [yF, yI(kk) + lWidth/2 * n(2,kk)];
-            end
-            
-            for kk = 1:length(sI)
-                xF = [xF, xI(end+1-kk) + lWidth/2 * n(1,end+1-kk)];
-                yF = [yF, yI(end+1-kk) + -lWidth/2 * n(2,end+1-kk)];
-            end
-            
-            xF = [xF, lWidth/2 * n(1,1)];
-            yF = [yF, lWidth/2 * n(2,1)];
+            [xF,yF,xNF,yNF] = calculateBeamPoints(xPoints,yPoints,obj.width,phi0,obj.type,obj.length0);
             obj.pl.XData = xF;
             obj.pl.YData = yF;
+            if obj.showNeutralFibre
+                obj.plF.XData = xNF;
+                obj.plF.YData = yNF;
+            end
         end        
 
         function globalLocation = local2global(obj,localLocation)
@@ -231,6 +202,9 @@ classdef beam < gfx2d.RigidBody
         
         function delete(obj)
             delete(obj.pl);
+            if ~isempty(obj.plF)
+                delete(obj.plF);
+            end
             if ~isempty(obj.window)
                 obj.window.deleteObject(obj.id);
             end
@@ -238,6 +212,9 @@ classdef beam < gfx2d.RigidBody
         
         function set.color(obj,newcolor)
             obj.pl.EdgeColor = newcolor;
+            if ~isempty(obj.plF)
+                obj.plF.EdgeColor = newcolor;
+            end
         end
         
         function col = get.color(obj)
@@ -251,5 +228,50 @@ classdef beam < gfx2d.RigidBody
         function col = get.facecolor(obj)
             col = obj.pl.FaceColor;
         end
+    end
+end
+
+function [xF,yF,xI,yI] = calculateBeamPoints(xPoints,yPoints,lWidth,phi0,type,l0)
+    s = [0,cumsum(sqrt(sum(diff([xPoints;yPoints],[],2).^2)))];
+    sI = linspace(0,s(end),max(100, length(s)));
+    for kk = 1:3
+        xI = interp1(s,xPoints,sI,"spline");
+        yI = interp1(s,yPoints,sI,"spline");
+        sI = [0,cumsum(sqrt(sum(diff([xI;yI],[],2).^2)))];
+    end
+    
+    if strcmp(type,'linear') 
+        xI = xI * l0/xI(end);
+    end
+
+    phis = [phi0, zeros(1,length(sI)-2), NaN];
+
+    for kk = 2:length(sI)-1
+        phis(kk) = atan((yI(kk+1)-yI(kk))/(xI(kk+1)-xI(kk)));
+    end
+
+    if strcmp(type,'linearized') 
+        phis(end) = 0;
+    else
+        phis(end) = phis(end-1);
+    end
+
+    xF = [];
+    yF = [];
+    for kk = 1:length(sI)
+        xF = [xF, xI(kk) - lWidth/2 * sin(phis(kk))];
+        yF = [yF, yI(kk) + lWidth/2 * cos(phis(kk))];
+    end
+
+    for kk = 1:length(sI)
+        xF = [xF, xI(end+1-kk) + lWidth/2 * sin(phis(end+1-kk))];
+        yF = [yF, yI(end+1-kk) - lWidth/2 * cos(phis(end+1-kk))];
+    end
+
+    xF = [xF, xF(1)];
+    yF = [yF, yF(1)];
+
+    if strcmp(type,'linearized') 
+        xF(xF>l0) = l0;
     end
 end
