@@ -273,7 +273,9 @@ classdef damper < gfx2d.LineObject
             delete(obj.handl{3});
             delete(obj.handl{4});
             delete(obj.handl{5});
-            obj.window.deleteObject(obj.id);
+            if ~isempty(obj.window)
+                obj.window.deleteObject(obj.id);
+            end
         end
         
         function set.color(obj,newcolor)
