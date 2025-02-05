@@ -27,18 +27,14 @@ classdef floatingbearing < gfx2d.RigidBody
             lw = 3;
             obj.b = b;
             obj.npl = 6/obj.b;
-            if length(orientation)==1
+            if isscalar(orientation)
                 obj.angle = orientation;
             else
                 obj.angle = atan2(orientation(2),orientation(1));
             end
-            k = (X-X0)*cos(obj.angle)+(Y-Y0)*sin(obj.angle);
-            XX = [X0;Y0]+[cos(obj.angle);sin(obj.angle)]*k;
-            X = XX(1);
-            Y = XX(2);
             obj.position = [X;Y];
             obj.position0 = [X0;Y0];
-            obj.wposition = [cos(obj.angle),sin(obj.angle);-sin(obj.angle),cos(obj.angle)]*[obj.b*[-1/2,+1/2];(-obj.b)*[1,1]];
+            obj.wposition = [obj.b*[-1/2,+1/2];(-obj.b)*[1,1]];
             %% Input:
             if nargin>stdinp
                 i = 1;
@@ -85,58 +81,59 @@ classdef floatingbearing < gfx2d.RigidBody
             xsr3 = r*cos(linspace(0,2*pi,obj.Nr));
             ysr3 = r*sin(linspace(0,2*pi,obj.Nr));
             % Wand:
-            l = (obj.position0(2)-obj.position(2))*sin(obj.angle)+(obj.position0(1)-obj.position(1))*cos(obj.angle);
-            DX0 = l*cos(obj.angle);
-            DY0 = l*sin(obj.angle);
+            l = (obj.position0(1)-obj.position(1));
             xsr4 = NaN;
             ysr4 = NaN;
             for i=1:n
-                xsr4 = [xsr4,NaN,DX0+obj.wposition(1,1)+rs*(i-1),DX0+obj.wposition(1,1)+rs*i];
+                xsr4 = [xsr4,NaN,l+obj.wposition(1,1)+rs*(i-1),l+obj.wposition(1,1)+rs*i];
                 if obj.direction>=0
-                    ysr4 = [ysr4,NaN,DY0-obj.b,DY0-obj.b-rs];
+                    ysr4 = [ysr4,NaN,-obj.b,-obj.b-rs];
                 else
-                    ysr4 = [ysr4,NaN,DY0-obj.b-rs,DY0-obj.b];
+                    ysr4 = [ysr4,NaN,-obj.b-rs,-obj.b];
                 end
             end
             lmnr = sqrt((obj.wposition(:,2)-obj.wposition(:,1))'*(obj.wposition(:,2)-obj.wposition(:,1)))-n*rs;
-            xsr4 = [xsr4,NaN,DX0+obj.wposition(1,1)+rs*n,DX0+obj.wposition(1,2)];
+            xsr4 = [xsr4,NaN,l+obj.wposition(1,1)+rs*n,l+obj.wposition(1,2)];
             if obj.direction>=0
-                ysr4 = [ysr4,NaN,DY0-obj.b,DY0-obj.b-lmnr];
+                ysr4 = [ysr4,NaN,-obj.b,-obj.b-lmnr];
             else
-                ysr4 = [ysr4,NaN,DY0-obj.b-rs,DY0-obj.b-(rs-lmnr)];
+                ysr4 = [ysr4,NaN,-obj.b-rs,-obj.b-(rs-lmnr)];
             end
             br = sqrt((obj.wposition(:,2)-obj.wposition(:,1))'*(obj.wposition(:,2)-obj.wposition(:,1)))/10;
-            xsr5 = [DX0+obj.wposition(1,1)+br,DX0+obj.wposition(1,2)-br];
-            ysr5 = [DY0-obj.b,DY0-obj.b];
-            xsr6 = [DX0+obj.wposition(1,1),DX0+obj.wposition(1,1)+br];
-            ysr6 = DY0-obj.b*[1,1];
-            xsr7 = [DX0+obj.wposition(1,2)-br,DX0+obj.wposition(1,2)];
-            ysr7 = DY0-obj.b*[1,1];
+            xsr5 = [l+obj.wposition(1,1)+br,l+obj.wposition(1,2)-br];
+            ysr5 = [-obj.b,-obj.b];
+            xsr6 = [l+obj.wposition(1,1),l+obj.wposition(1,1)+br];
+            ysr6 = -obj.b*[1,1];
+            xsr7 = [l+obj.wposition(1,2)-br,l+obj.wposition(1,2)];
+            ysr7 = -obj.b*[1,1];
             % Transformation:
             alpha = obj.angle;
-            xs1 = obj.position(1)+(xsr1*cos(alpha)+ysr1*sin(alpha));
-            ys1 = obj.position(2)+(-xsr1*sin(alpha)+ysr1*cos(alpha));
-            xs2 = obj.position(1)+(xsr2*cos(alpha)+ysr2*sin(alpha));
-            ys2 = obj.position(2)+(-xsr2*sin(alpha)+ysr2*cos(alpha));
-            xs3 = obj.position(1)+(xsr3*cos(alpha)+ysr3*sin(alpha));
-            ys3 = obj.position(2)+(-xsr3*sin(alpha)+ysr3*cos(alpha));
-            xs4 = obj.position(1)+(xsr4*cos(alpha)+ysr4*sin(alpha));
-            ys4 = obj.position(2)+(-xsr4*sin(alpha)+ysr4*cos(alpha));
-            xs5 = obj.position(1)+(xsr5*cos(alpha)+ysr5*sin(alpha));
-            ys5 = obj.position(2)+(-xsr5*sin(alpha)+ysr5*cos(alpha));
-            xs6 = obj.position(1)+(xsr6*cos(alpha)+ysr6*sin(alpha));
-            ys6 = obj.position(2)+(-xsr6*sin(alpha)+ysr6*cos(alpha));
-            xs7 = obj.position(1)+(xsr7*cos(alpha)+ysr7*sin(alpha));
-            ys7 = obj.position(2)+(-xsr7*sin(alpha)+ysr7*cos(alpha));
+            xs1 = (xsr1*cos(alpha)+ysr1*sin(alpha));
+            ys1 = (-xsr1*sin(alpha)+ysr1*cos(alpha));
+            xs2 = (xsr2*cos(alpha)+ysr2*sin(alpha));
+            ys2 = (-xsr2*sin(alpha)+ysr2*cos(alpha));
+            xs3 = (xsr3*cos(alpha)+ysr3*sin(alpha));
+            ys3 = (-xsr3*sin(alpha)+ysr3*cos(alpha));
+            xs4 = (xsr4*cos(alpha)+ysr4*sin(alpha));
+            ys4 = (-xsr4*sin(alpha)+ysr4*cos(alpha));
+            xs5 = (xsr5*cos(alpha)+ysr5*sin(alpha));
+            ys5 = (-xsr5*sin(alpha)+ysr5*cos(alpha));
+            xs6 = (xsr6*cos(alpha)+ysr6*sin(alpha));
+            ys6 = (-xsr6*sin(alpha)+ysr6*cos(alpha));
+            xs7 = (xsr7*cos(alpha)+ysr7*sin(alpha));
+            ys7 = (-xsr7*sin(alpha)+ysr7*cos(alpha));
+            %%
+            obj.hgTransformHandle = hgtransform();
+            obj.setPosition(X,Y,orientation);
             %% Plot:
             obj.plotHandle = cell(4,1);
-            obj.plotHandle{1} = fill(xs1,ys1,'','FaceColor',facecolor,'EdgeColor',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'drag',obj});
-            obj.plotHandle{2} = fill(xs3,ys3,'','FaceColor',facecolor,'EdgeColor',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'drag',obj});
-            obj.plotHandle{3} = plot(xs2,ys2,'Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'drag',obj});
-            obj.plotHandle{4} = plot(xs4,ys4,'Color',color,'LineWidth',lw/2,'buttondownfcn',{@Mouse_Callback,'dragwall',obj}); % Schraf.
-            obj.plotHandle{5} = plot(xs5,ys5,'Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'dragwall',obj}); % Mitte
-            obj.plotHandle{6} = plot(xs6,ys6,'Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'dragwall',obj});%,'buttondownfcn',{@Mouse_Callback,'downl',obj}); % Rand links
-            obj.plotHandle{7} = plot(xs7,ys7,'Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'dragwall',obj});%,'buttondownfcn',{@Mouse_Callback,'downr',obj}); % Rand rechts
+            obj.plotHandle{1} = fill(xs1,ys1,'','FaceColor',facecolor,'EdgeColor',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'drag',obj},'Parent',obj.hgTransformHandle);
+            obj.plotHandle{2} = fill(xs3,ys3,'','FaceColor',facecolor,'EdgeColor',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'drag',obj},'Parent',obj.hgTransformHandle);
+            obj.plotHandle{3} = plot(xs2,ys2,'Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'drag',obj},'Parent',obj.hgTransformHandle);
+            obj.plotHandle{4} = plot(xs4,ys4,'Color',color,'LineWidth',lw/2,'buttondownfcn',{@Mouse_Callback,'dragwall',obj},'Parent',obj.hgTransformHandle); % Schraf.
+            obj.plotHandle{5} = plot(xs5,ys5,'Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'dragwall',obj},'Parent',obj.hgTransformHandle); % Mitte
+            obj.plotHandle{6} = plot(xs6,ys6,'Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'dragwall',obj},'Parent',obj.hgTransformHandle);%,'buttondownfcn',{@Mouse_Callback,'downl',obj}); % Rand links
+            obj.plotHandle{7} = plot(xs7,ys7,'Color',color,'LineWidth',lw,'buttondownfcn',{@Mouse_Callback,'dragwall',obj},'Parent',obj.hgTransformHandle);%,'buttondownfcn',{@Mouse_Callback,'downr',obj}); % Rand rechts
             
             %% Callback function:
             function Mouse_Callback(hObj,~,action,sObj)
@@ -268,6 +265,7 @@ classdef floatingbearing < gfx2d.RigidBody
                 end
                 obj.angle = alpha;
             end
+            setPosition@gfx2d.RigidBody(obj,X,Y,obj.angle);
             k = (X-obj.position0(1))*cos(obj.angle)+(Y-obj.position0(2))*sin(obj.angle);
             XX = obj.position0+[cos(obj.angle);sin(obj.angle)]*k;
             X = XX(1);
@@ -313,21 +311,21 @@ classdef floatingbearing < gfx2d.RigidBody
             xsr7 = [DX0+obj.wposition(1,2)-br,DX0+obj.wposition(1,2)];
             ysr7 = DY0-obj.b*[1,1];
             % Transformation:
-            alpha = obj.angle;
-            xs1 = X+(xsr1*cos(alpha)+ysr1*sin(alpha));
-            ys1 = Y+(-xsr1*sin(alpha)+ysr1*cos(alpha));
-            xs2 = X+(xsr2*cos(alpha)+ysr2*sin(alpha));
-            ys2 = Y+(-xsr2*sin(alpha)+ysr2*cos(alpha));
-            xs3 = X+(xsr3*cos(alpha)+ysr3*sin(alpha));
-            ys3 = Y+(-xsr3*sin(alpha)+ysr3*cos(alpha));
-            xs4 = X+(xsr4*cos(alpha)+ysr4*sin(alpha));
-            ys4 = Y+(-xsr4*sin(alpha)+ysr4*cos(alpha));
-            xs5 = X+(xsr5*cos(alpha)+ysr5*sin(alpha));
-            ys5 = Y+(-xsr5*sin(alpha)+ysr5*cos(alpha));
-            xs6 = X+(xsr6*cos(alpha)+ysr6*sin(alpha));
-            ys6 = Y+(-xsr6*sin(alpha)+ysr6*cos(alpha));
-            xs7 = X+(xsr7*cos(alpha)+ysr7*sin(alpha));
-            ys7 = Y+(-xsr7*sin(alpha)+ysr7*cos(alpha));
+            alpha = 0;
+            xs1 = (xsr1*cos(alpha)+ysr1*sin(alpha));
+            ys1 = (-xsr1*sin(alpha)+ysr1*cos(alpha));
+            xs2 = (xsr2*cos(alpha)+ysr2*sin(alpha));
+            ys2 = (-xsr2*sin(alpha)+ysr2*cos(alpha));
+            xs3 = (xsr3*cos(alpha)+ysr3*sin(alpha));
+            ys3 = (-xsr3*sin(alpha)+ysr3*cos(alpha));
+            xs4 = (xsr4*cos(alpha)+ysr4*sin(alpha));
+            ys4 = (-xsr4*sin(alpha)+ysr4*cos(alpha));
+            xs5 = (xsr5*cos(alpha)+ysr5*sin(alpha));
+            ys5 = (-xsr5*sin(alpha)+ysr5*cos(alpha));
+            xs6 = (xsr6*cos(alpha)+ysr6*sin(alpha));
+            ys6 = (-xsr6*sin(alpha)+ysr6*cos(alpha));
+            xs7 = (xsr7*cos(alpha)+ysr7*sin(alpha));
+            ys7 = (-xsr7*sin(alpha)+ysr7*cos(alpha));
             %% Update:
             obj.plotHandle{1}.XData = xs1;
             obj.plotHandle{1}.YData = ys1;
@@ -343,7 +341,7 @@ classdef floatingbearing < gfx2d.RigidBody
             obj.plotHandle{6}.YData = ys6;
             obj.plotHandle{7}.XData = xs7;
             obj.plotHandle{7}.YData = ys7;
-            
+
             obj.position = [X; Y];
             notify(obj,'changedPosition');
         end
@@ -378,7 +376,9 @@ classdef floatingbearing < gfx2d.RigidBody
             delete(obj.plotHandle{5});
             delete(obj.plotHandle{6});
             delete(obj.plotHandle{7});
-            obj.window.deleteObject(obj.id);
+            if ~isempty(obj.window)
+                obj.window.deleteObject(obj.id);
+            end
         end
         
         function set.color(obj,newcolor)
